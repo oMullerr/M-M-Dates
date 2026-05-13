@@ -1,0 +1,305 @@
+:host { display: block; }
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 900px;
+}
+
+.page-header { margin-bottom: 4px; }
+
+.page-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* ===========================================================
+   CARDS
+   =========================================================== */
+
+.settings-card { border-radius: 20px !important; }
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.card-row-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-row-icon .mat-icon { font-size: 22px; width: 22px; height: 22px; }
+
+.icon-primary {
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.icon-secondary {
+  background: color-mix(in srgb, var(--mat-sys-secondary) 16%, transparent);
+  color: var(--mat-sys-secondary);
+}
+
+.icon-tertiary {
+  background: color-mix(in srgb, var(--mat-sys-tertiary) 16%, transparent);
+  color: var(--mat-sys-tertiary);
+}
+
+.card-row-text { flex: 1; min-width: 0; }
+
+.card-row-text h2,
+.section-header h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+  color: var(--mat-sys-on-surface);
+}
+
+.card-row-text p,
+.section-header p {
+  font-size: 0.82rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.section-title-block { flex: 1; min-width: 0; }
+
+/* ===========================================================
+   BUDGET
+   =========================================================== */
+
+.budget-block {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.budget-current {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+  color: white;
+}
+
+.budget-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.92;
+}
+
+.budget-value {
+  font-size: 2.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.budget-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.budget-input { flex: 1; }
+
+.budget-save {
+  border-radius: 14px !important;
+  height: 56px !important;
+  padding: 0 24px !important;
+}
+
+.budget-save .mat-icon { margin-right: 6px; }
+
+.presets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.presets-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.presets mat-chip { cursor: pointer; }
+
+/* ===========================================================
+   PAYMENT METHODS
+   =========================================================== */
+
+.add-btn {
+  border-radius: 999px !important;
+  padding: 0 18px !important;
+  white-space: nowrap;
+}
+
+.add-btn .mat-icon { margin-right: 4px; }
+
+.methods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.method-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  transition: all 0.2s;
+}
+
+.method-card:hover {
+  border-color: var(--method-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.method-color {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--method-color);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--method-color) 30%, transparent);
+}
+
+.method-info { flex: 1; min-width: 0; }
+
+.method-info strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.method-info small {
+  font-size: 0.78rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* ===========================================================
+   ABOUT
+   =========================================================== */
+
+.about-card {
+  border-radius: 20px !important;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface)) 0%,
+    color-mix(in srgb, var(--mat-sys-tertiary) 8%, var(--mat-sys-surface)) 100%) !important;
+  border: 1px dashed var(--mat-sys-outline-variant);
+}
+
+.about {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.about-emoji {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.about h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+  color: var(--mat-sys-on-surface);
+}
+
+.about p {
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  line-height: 1.5;
+}
+
+/* ===========================================================
+   EMPTY
+   =========================================================== */
+
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 20px;
+  gap: 8px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.empty .mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  opacity: 0.4;
+}
+
+/* ===========================================================
+   RESPONSIVE
+   =========================================================== */
+
+@media (max-width: 700px) {
+  .page-title { font-size: 1.45rem; }
+
+  .budget-value { font-size: 2rem; }
+
+  .budget-form {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .budget-save {
+    width: 100%;
+    height: 48px !important;
+  }
+
+  .section-header { flex-wrap: wrap; }
+
+  .add-btn { width: 100%; }
+
+  .card-row { flex-wrap: wrap; }
+}
+
+@media (max-width: 420px) {
+  .methods-grid { grid-template-columns: 1fr; }
+}

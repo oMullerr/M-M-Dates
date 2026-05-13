@@ -1,0 +1,206 @@
+<div class="settings fade-up">
+
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Configurações</h1>
+      <p class="page-subtitle">Personalize o budget, formas de pagamento e o tema</p>
+    </div>
+  </header>
+
+  <!-- THEME -->
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <div class="card-row">
+        <div class="card-row-icon icon-secondary">
+          <mat-icon>{{ themeService.isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+        </div>
+        <div class="card-row-text">
+          <h2>Aparência</h2>
+          <p>Escolha entre modo claro ou escuro</p>
+        </div>
+        <mat-slide-toggle
+          [checked]="themeService.isDark()"
+          (change)="themeService.toggle()"
+          color="primary"
+        >
+          {{ themeService.isDark() ? 'Escuro' : 'Claro' }}
+        </mat-slide-toggle>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- BUDGET -->
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <header class="section-header">
+        <div class="card-row-icon icon-primary">
+          <mat-icon>savings</mat-icon>
+        </div>
+        <div>
+          <h2>Budget mensal</h2>
+          <p>Quanto vocês reservam por mês para os dates</p>
+        </div>
+      </header>
+
+      <div class="budget-block">
+        <div class="budget-current">
+          <span class="budget-label">Valor atual</span>
+          <strong class="budget-value serif numeric">{{ currentBudget() | brl }}</strong>
+        </div>
+
+        <form [formGroup]="budgetForm" (ngSubmit)="saveBudget()" class="budget-form">
+          <mat-form-field appearance="outline" class="budget-input">
+            <mat-label>Novo valor</mat-label>
+            <span matTextPrefix>R$&nbsp;</span>
+            <input
+              matInput
+              type="number"
+              formControlName="value"
+              step="0.01"
+              min="1"
+              inputmode="decimal"
+            />
+          </mat-form-field>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="budgetForm.invalid || savingBudget()"
+            class="budget-save"
+          >
+            <mat-icon>save</mat-icon>
+            Salvar
+          </button>
+        </form>
+
+        <div class="presets">
+          <span class="presets-label">Sugestões</span>
+          <mat-chip-set>
+            @for (preset of budgetPresets; track preset) {
+              <mat-chip
+                [highlighted]="budgetForm.value.value === preset"
+                (click)="applyPreset(preset)"
+              >
+                {{ preset | brl }}
+              </mat-chip>
+            }
+          </mat-chip-set>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- PAYMENT METHODS -->
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <header class="section-header">
+        <div class="card-row-icon icon-tertiary">
+          <mat-icon>credit_card</mat-icon>
+        </div>
+        <div class="section-title-block">
+          <h2>Formas de pagamento</h2>
+          <p>Cartões e métodos usados para pagar os lanchinhos</p>
+        </div>
+        <button
+          mat-flat-button
+          color="primary"
+          class="add-btn"
+          (click)="openAddMethod()"
+        >
+          <mat-icon>add</mat-icon>
+          Adicionar
+        </button>
+      </header>
+
+      <div class="methods-grid">
+        @for (method of paymentMethods(); track method.name) {
+          <div class="method-card" [style.--method-color]="method.color">
+            <span class="method-color"></span>
+            <div class="method-info">
+              <strong>{{ method.name }}</strong>
+              <small>{{ method.owner }}</small>
+            </div>
+            <button mat-icon-button (click)="openEditMethod(method)" matTooltip="Editar" aria-label="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="removeMethod(method)" matTooltip="Remover" aria-label="Remover">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (paymentMethods().length === 0) {
+          <div class="empty">
+            <mat-icon>credit_card_off</mat-icon>
+            <p>Nenhuma forma de pagamento cadastrada</p>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- BACKUP -->
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <header class="section-header">
+        <div class="card-row-icon icon-accent">
+          <mat-icon>cloud_sync</mat-icon>
+        </div>
+        <div class="section-title-block">
+          <h2>Backup & Restauração</h2>
+          <p>Seus dados ficam salvos no navegador. Exporte para fazer backup ou sincronizar entre dispositivos</p>
+        </div>
+      </header>
+
+      <div class="backup-actions">
+        <button mat-stroked-button (click)="exportBackup()" class="backup-btn">
+          <mat-icon>download</mat-icon>
+          Exportar backup
+        </button>
+
+        <button mat-stroked-button (click)="triggerImport()" class="backup-btn">
+          <mat-icon>upload</mat-icon>
+          Importar backup
+        </button>
+
+        <button mat-stroked-button color="warn" (click)="resetAll()" class="backup-btn">
+          <mat-icon>restart_alt</mat-icon>
+          Resetar tudo
+        </button>
+
+        <input
+          #fileInput
+          type="file"
+          accept=".json,application/json"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+      </div>
+
+      <div class="backup-hint">
+        <mat-icon>info</mat-icon>
+        <p>
+          Para usar os mesmos dados em outro dispositivo, exporte o backup aqui e importe lá.
+          O navegador guarda os dados localmente — eles não são compartilhados automaticamente.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ABOUT -->
+  <mat-card class="about-card">
+    <mat-card-content>
+      <div class="about">
+        <span class="about-emoji">💕</span>
+        <div>
+          <h3>M&M Dates</h3>
+          <p>
+            Feito com carinho para casais que querem controlar o budget dos dates.
+            Todo mês o budget reinicia automaticamente. Bom date! 🥂
+          </p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

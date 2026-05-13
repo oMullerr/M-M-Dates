@@ -1,0 +1,202 @@
+<div class="expenses fade-up">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Gastos</h1>
+      <p class="page-subtitle">Tudo que vocês registraram em {{ filter.label() }}</p>
+    </div>
+    <button mat-flat-button color="primary" class="header-cta" (click)="openNew()">
+      <mat-icon>add</mat-icon>
+      Novo lanchinho
+    </button>
+  </header>
+
+  <!-- SUMMARY -->
+  <mat-card class="summary-card">
+    <mat-card-content>
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-icon">
+            <mat-icon>receipt_long</mat-icon>
+          </span>
+          <div>
+            <small>Quantidade</small>
+            <strong>
+              {{ monthExpenses().length }}
+              {{ monthExpenses().length === 1 ? 'gasto' : 'gastos' }}
+            </strong>
+          </div>
+        </div>
+
+        <mat-divider [vertical]="true" />
+
+        <div class="summary-item">
+          <span class="summary-icon">
+            <mat-icon>payments</mat-icon>
+          </span>
+          <div>
+            <small>Total no mês</small>
+            <strong class="serif numeric">{{ monthTotal() | brl }}</strong>
+          </div>
+        </div>
+
+        <mat-divider [vertical]="true" />
+
+        <div class="summary-item">
+          <span class="summary-icon">
+            <mat-icon>show_chart</mat-icon>
+          </span>
+          <div>
+            <small>Média por gasto</small>
+            <strong class="serif numeric">{{ average() | brl }}</strong>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- FILTERS -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar por local</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            [value]="searchTerm()"
+            (input)="searchTerm.set($any($event.target).value)"
+            placeholder="Digite o nome do estabelecimento"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="select-field">
+          <mat-label>Forma de pagamento</mat-label>
+          <mat-select
+            [value]="methodFilter()"
+            (selectionChange)="methodFilter.set($event.value)"
+          >
+            <mat-option value="">Todas</mat-option>
+            @for (pm of paymentMethods(); track pm.name) {
+              <mat-option [value]="pm.name">
+                <span class="select-row">
+                  <span class="select-dot" [style.background]="pm.color"></span>
+                  {{ pm.name }}
+                </span>
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="select-field">
+          <mat-label>Ordenar por</mat-label>
+          <mat-select
+            [value]="sort()"
+            (selectionChange)="sort.set($event.value)"
+          >
+            <mat-option value="date-desc">Mais recentes</mat-option>
+            <mat-option value="date-asc">Mais antigos</mat-option>
+            <mat-option value="value-desc">Maior valor</mat-option>
+            <mat-option value="value-asc">Menor valor</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- LIST -->
+  @if (filteredExpenses().length > 0) {
+    <mat-card class="list-card">
+      <mat-card-content class="list-content">
+        @for (expense of filteredExpenses(); track expense.id) {
+          <div class="row-item">
+            <span class="row-bar" [style.background]="colorForMethod(expense.paymentMethod)"></span>
+
+            <div class="row-date">
+              <span class="date-chip">{{ expense.date }}</span>
+            </div>
+
+            <div class="row-location">
+              <strong>{{ expense.location }}</strong>
+              <small class="row-method-mobile">
+                <span class="mini-dot" [style.background]="colorForMethod(expense.paymentMethod)"></span>
+                {{ expense.paymentMethod }}
+              </small>
+            </div>
+
+            <div class="row-method-desktop">
+              <span class="method-chip" [style.--chip-color]="colorForMethod(expense.paymentMethod)">
+                <span class="chip-dot"></span>
+                {{ expense.paymentMethod }}
+              </span>
+            </div>
+
+            <div class="row-value serif numeric">{{ expense.value | brl }}</div>
+
+            <div class="row-actions">
+              <button
+                mat-icon-button
+                (click)="copyMessage(expense)"
+                matTooltip="Copiar mensagem"
+                aria-label="Copiar mensagem"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                aria-label="Mais ações"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openEdit(expense)">
+                  <mat-icon>edit</mat-icon>
+                  Editar
+                </button>
+                <button mat-menu-item (click)="remove(expense)" class="menu-destructive">
+                  <mat-icon>delete</mat-icon>
+                  Excluir
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card class="empty-card">
+      <mat-card-content>
+        <div class="empty">
+          <span class="empty-emoji">🍔</span>
+          @if (expensesAll().length === 0) {
+            <h3>Nenhum lanchinho registrado ainda</h3>
+            <p>Adicione o primeiro clicando no botão acima</p>
+          } @else if (monthExpenses().length === 0) {
+            <h3>Sem gastos em {{ filter.label() }}</h3>
+            <p>Tente navegar para outro mês ou registre um novo</p>
+          } @else {
+            <h3>Nenhum resultado para essa busca</h3>
+            <p>Tente outro termo ou limpe os filtros</p>
+            <button mat-stroked-button (click)="clearFilters()">
+              <mat-icon>clear</mat-icon>
+              Limpar filtros
+            </button>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- FAB MOBILE -->
+  <button
+    mat-fab
+    color="primary"
+    class="fab-mobile"
+    (click)="openNew()"
+    aria-label="Novo lanchinho"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>
