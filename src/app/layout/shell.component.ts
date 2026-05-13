@@ -4,6 +4,7 @@ import {
   inject,
   signal,
   ViewChild,
+  ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
@@ -36,6 +37,7 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
     MatTooltipModule,
     MonthFilterComponent,
   ],
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <mat-sidenav-container class="shell" autosize>
@@ -146,6 +148,17 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
       border-right: 1px solid var(--mat-sys-outline-variant);
       display: flex;
       flex-direction: column;
+    }
+
+    @media (max-width: 900px) {
+      .sidenav {
+        background: var(--mat-sys-surface-container);
+        box-shadow: 4px 0 32px rgba(0, 0, 0, 0.28);
+      }
+
+      ::ng-deep .mat-drawer-backdrop.mat-drawer-shown {
+        background-color: rgba(0, 0, 0, 0.45) !important;
+      }
     }
 
     .brand {
