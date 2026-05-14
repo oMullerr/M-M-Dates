@@ -5,11 +5,13 @@ import { filter, map, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 /**
- * Blocks access to a route until the user is authenticated.
- * Waits for the initial Firebase auth state to resolve, then either
- * allows the navigation or redirects to /login.
+ * Inverse of authGuard: blocks already-authenticated users from reaching
+ * the login screen, sending them straight to the dashboard.
+ *
+ * Used on the login route so that opening the app while a session is
+ * still valid skips the login form entirely.
  */
-export const authGuard: CanActivateFn = () => {
+export const noAuthGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
@@ -18,9 +20,9 @@ export const authGuard: CanActivateFn = () => {
     take(1),
     map(() => {
       if (auth.currentUser()) {
-        return true;
+        return router.createUrlTree(['/dashboard']);
       }
-      return router.createUrlTree(['/login']);
+      return true;
     }),
   );
 };
