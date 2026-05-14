@@ -4,31 +4,55 @@
    ANGULAR MATERIAL THEME — Light + Dark (M3 API for v18.2)
    =========================================================== */
 
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$violet-palette,
-    tertiary: mat.$rose-palette,
-  ),
-  typography: (
-    plain-family: 'Plus Jakarta Sans',
-    brand-family: 'DM Serif Display',
-  ),
-  density: (scale: 0),
-));
+// $light-theme: mat.define-theme((
+//   color: (
+//     theme-type: light,
+//     primary: mat.$violet-palette,
+//     tertiary: mat.$rose-palette,
+//   ),
+//   typography: (
+//     plain-family: 'Plus Jakarta Sans',
+//     brand-family: 'DM Serif Display',
+//   ),
+//   density: (scale: 0),
+// ));
 
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: mat.$violet-palette,
-    tertiary: mat.$rose-palette,
-  ),
-  typography: (
-    plain-family: 'Plus Jakarta Sans',
-    brand-family: 'DM Serif Display',
-  ),
-  density: (scale: 0),
-));
+// $dark-theme: mat.define-theme((
+//   color: (
+//     theme-type: dark,
+//     primary: mat.$violet-palette,
+//     tertiary: mat.$rose-palette,
+//   ),
+//   typography: (
+//     plain-family: 'Plus Jakarta Sans',
+//     brand-family: 'DM Serif Display',
+//   ),
+//   density: (scale: 0),
+// ));
+
+$light-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$violet-palette,
+        tertiary: mat.$rose-palette,
+        system-variables-prefix: mat-sys, // ← novo
+      ),
+      typography: (plain-family: 'Plus Jakarta Sans',
+        brand-family: 'DM Serif Display',
+        system-variables-prefix: mat-sys, // ← novo
+      ),
+      density: (scale: 0),
+    ));
+
+$dark-theme: mat.define-theme((color: (theme-type: dark,
+        primary: mat.$violet-palette,
+        tertiary: mat.$rose-palette,
+        system-variables-prefix: mat-sys, // ← novo
+      ),
+      typography: (plain-family: 'Plus Jakarta Sans',
+        brand-family: 'DM Serif Display',
+        system-variables-prefix: mat-sys, // ← novo
+      ),
+      density: (scale: 0),
+    ));
 
 html {
   @include mat.all-component-themes($light-theme);
@@ -53,7 +77,8 @@ html.dark-theme {
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -68,7 +93,10 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: 'DM Serif Display', Georgia, serif;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -76,8 +104,14 @@ h1, h2, h3, h4 {
   color: var(--mat-sys-on-surface);
 }
 
-p { margin: 0; }
-button { cursor: pointer; font-family: inherit; }
+p {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
 
 /* ===========================================================
    UTILITIES
@@ -89,7 +123,9 @@ button { cursor: pointer; font-family: inherit; }
   letter-spacing: -0.02em;
 }
 
-.text-muted { color: var(--mat-sys-on-surface-variant); }
+.text-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
 
 .numeric {
   font-variant-numeric: tabular-nums;
@@ -105,7 +141,9 @@ button { cursor: pointer; font-family: inherit; }
   border-radius: 20px !important;
 }
 
-.mat-mdc-form-field { width: 100%; }
+.mat-mdc-form-field {
+  width: 100%;
+}
 
 .mat-mdc-dialog-container {
   --mdc-dialog-container-shape: 24px;
@@ -140,30 +178,56 @@ button { cursor: pointer; font-family: inherit; }
 
 /* Scrollbar (desktop only) */
 @media (hover: hover) {
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   ::-webkit-scrollbar-thumb {
     background: var(--mat-sys-outline-variant);
     border-radius: 10px;
     border: 2px solid var(--mat-sys-surface);
   }
-  ::-webkit-scrollbar-thumb:hover { background: var(--mat-sys-outline); }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--mat-sys-outline);
+  }
 }
 
 /* Smooth theme transition */
-html, body, .mat-mdc-card, .mat-mdc-button-base, .mat-mdc-form-field {
+html,
+body,
+.mat-mdc-card,
+.mat-mdc-button-base,
+.mat-mdc-form-field {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Animations */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.fade-up { animation: fade-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.fade-up {
+  animation: fade-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
 
 /* Mobile touch targets */
 @media (max-width: 600px) {
-  .mat-mdc-icon-button { min-width: 44px; min-height: 44px; }
+  .mat-mdc-icon-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }

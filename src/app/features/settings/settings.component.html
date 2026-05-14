@@ -18,11 +18,7 @@
           <h2>Aparência</h2>
           <p>Escolha entre modo claro ou escuro</p>
         </div>
-        <mat-slide-toggle
-          [checked]="themeService.isDark()"
-          (change)="themeService.toggle()"
-          color="primary"
-        >
+        <mat-slide-toggle [checked]="themeService.isDark()" (change)="themeService.toggle()" color="primary">
           {{ themeService.isDark() ? 'Escuro' : 'Claro' }}
         </mat-slide-toggle>
       </div>
@@ -52,23 +48,11 @@
           <mat-form-field appearance="outline" class="budget-input">
             <mat-label>Novo valor</mat-label>
             <span matTextPrefix>R$&nbsp;</span>
-            <input
-              matInput
-              type="number"
-              formControlName="value"
-              step="0.01"
-              min="1"
-              inputmode="decimal"
-            />
+            <input matInput type="number" formControlName="value" step="0.01" min="1" inputmode="decimal" />
           </mat-form-field>
 
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="budgetForm.invalid || savingBudget()"
-            class="budget-save"
-          >
+          <button mat-flat-button color="primary" type="submit" [disabled]="budgetForm.invalid || savingBudget()"
+            class="budget-save">
             <mat-icon>save</mat-icon>
             Salvar
           </button>
@@ -78,12 +62,9 @@
           <span class="presets-label">Sugestões</span>
           <mat-chip-set>
             @for (preset of budgetPresets; track preset) {
-              <mat-chip
-                [highlighted]="budgetForm.value.value === preset"
-                (click)="applyPreset(preset)"
-              >
-                {{ preset | brl }}
-              </mat-chip>
+            <mat-chip [highlighted]="budgetForm.value.value === preset" (click)="applyPreset(preset)">
+              {{ preset | brl }}
+            </mat-chip>
             }
           </mat-chip-set>
         </div>
@@ -102,12 +83,7 @@
           <h2>Formas de pagamento</h2>
           <p>Cartões e métodos usados para pagar os lanchinhos</p>
         </div>
-        <button
-          mat-flat-button
-          color="primary"
-          class="add-btn"
-          (click)="openAddMethod()"
-        >
+        <button mat-flat-button color="primary" class="add-btn" (click)="openAddMethod()">
           <mat-icon>add</mat-icon>
           Adicionar
         </button>
@@ -115,36 +91,26 @@
 
       <div class="methods-grid">
         @for (method of paymentMethods(); track method.name) {
-          <div class="method-card" [style.--method-color]="method.color">
-            <span class="method-color"></span>
-            <div class="method-info">
-              <strong>{{ method.name }}</strong>
-              <small>{{ method.owner }}</small>
-            </div>
-            <button
-              mat-icon-button
-              (click)="openEditMethod(method)"
-              matTooltip="Editar"
-              aria-label="Editar"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              (click)="removeMethod(method)"
-              matTooltip="Remover"
-              aria-label="Remover"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+        <div class="method-card" [style.--method-color]="method.color">
+          <span class="method-color"></span>
+          <div class="method-info">
+            <strong>{{ method.name }}</strong>
+            <small>{{ method.owner }}</small>
           </div>
+          <button mat-icon-button (click)="openEditMethod(method)" matTooltip="Editar" aria-label="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="removeMethod(method)" matTooltip="Remover" aria-label="Remover">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
         }
 
         @if (paymentMethods().length === 0) {
-          <div class="empty">
-            <mat-icon>credit_card_off</mat-icon>
-            <p>Nenhuma forma de pagamento cadastrada</p>
-          </div>
+        <div class="empty">
+          <mat-icon>credit_card_off</mat-icon>
+          <p>Nenhuma forma de pagamento cadastrada</p>
+        </div>
         }
       </div>
     </mat-card-content>
@@ -180,22 +146,6 @@
           Sua/seu par precisa criar uma conta na tela de login e colar este código no campo
           <strong>"Código do casal"</strong>. Aí vocês passam a ver os mesmos dados em qualquer dispositivo.
         </p>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- ABOUT -->
-  <mat-card class="about-card">
-    <mat-card-content>
-      <div class="about">
-        <span class="about-emoji">💕</span>
-        <div>
-          <h3>M&M Dates</h3>
-          <p>
-            Feito com carinho para casais que querem controlar o budget dos dates.
-            Todo mês o budget reinicia automaticamente. Bom date! 🥂
-          </p>
-        </div>
       </div>
     </mat-card-content>
   </mat-card>
