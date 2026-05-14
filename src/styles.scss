@@ -149,6 +149,60 @@ button {
   --mdc-dialog-container-shape: 24px;
 }
 
+/* ===========================================================
+   EXPENSE DIALOG — desktop floating + mobile bottom-sheet
+   =========================================================== */
+
+/* Backdrop com mais contraste para destacar a modal. */
+.expense-dialog-backdrop {
+  background: color-mix(in srgb, #000 50%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Desktop default — already centered by CDK Overlay. We just polish the
+   chrome of the container so the inner component owns its own layout. */
+.expense-dialog-panel {
+  .mat-mdc-dialog-surface {
+    border-radius: 24px !important;
+    overflow: hidden;
+    background: var(--mat-sys-surface) !important;
+  }
+
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* Mobile bottom-sheet variant.
+   The CDK Overlay positions us at top: 0 / left: 0 with width/height 100vw,
+   so we just need to flatten the inner surface and let the dialog component
+   handle the rest. */
+.expense-dialog-panel--mobile {
+  max-width: 100vw !important;
+  max-height: 100dvh !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+
+  .mat-mdc-dialog-surface {
+    border-radius: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+  }
+}
+
+/* Ensure the overlay always sits above sticky toolbars and FABs. */
+.cdk-overlay-container {
+  z-index: 1100;
+}
+
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-shape: 12px;
 }

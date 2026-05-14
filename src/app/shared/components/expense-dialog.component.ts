@@ -17,7 +17,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -30,6 +29,20 @@ export interface ExpenseDialogData {
   expense?: Expense;
 }
 
+/**
+ * Expense create/edit dialog.
+ *
+ * Layout:
+ * - Desktop  → floating card centered on the viewport, max-width 560px, rounded corners
+ * - Mobile   → fullscreen "bottom-sheet" feel (rounded top corners, footer pinned to bottom)
+ *
+ * Mobile/desktop differences live in CSS via the `expense-dialog-panel--mobile`
+ * class added by `ExpenseDialogService` when the viewport is narrow.
+ *
+ * The structure is a stable 3-row flexbox: header (sticky), body (scrolls),
+ * footer (sticky). The body grows to fill available height so the form is
+ * always visible without users needing to scroll past tabs/banners.
+ */
 @Component({
   selector: 'app-expense-dialog',
   standalone: true,
@@ -42,7 +55,6 @@ export interface ExpenseDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
   ],
@@ -52,7 +64,7 @@ export interface ExpenseDialogData {
       <header class="dialog-header">
         <div class="title-block">
           <span class="emoji" aria-hidden="true">🍕</span>
-          <div>
+          <div class="title-text">
             <h2 class="dialog-title">
               {{ isEdit() ? 'Editar lanchinho' : 'Oh o lanchinho!!' }}
             </h2>
@@ -61,12 +73,16 @@ export interface ExpenseDialogData {
             </p>
           </div>
         </div>
-        <button mat-icon-button (click)="cancel()" aria-label="Fechar">
+        <button
+          mat-icon-button
+          type="button"
+          (click)="cancel()"
+          aria-label="Fechar"
+          class="close-btn"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </header>
-
-      <mat-divider />
 
       <form [formGroup]="form" (ngSubmit)="save()" class="dialog-body">
         <div class="row">
@@ -159,10 +175,14 @@ export interface ExpenseDialogData {
         }
       </form>
 
-      <mat-divider />
-
       <footer class="dialog-footer">
-        <button mat-button type="button" (click)="cancel()" [disabled]="saving()">
+        <button
+          mat-button
+          type="button"
+          (click)="cancel()"
+          [disabled]="saving()"
+          class="footer-cancel"
+        >
           Cancelar
         </button>
         <button
@@ -171,6 +191,7 @@ export interface ExpenseDialogData {
           type="button"
           (click)="save()"
           [disabled]="form.invalid || saving()"
+          class="footer-save"
         >
           @if (saving()) {
             <mat-spinner diameter="20" />
@@ -185,24 +206,53 @@ export interface ExpenseDialogData {
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     .dialog {
       display: flex;
       flex-direction: column;
-      min-width: 320px;
-      max-width: 560px;
       width: 100%;
+      height: 100%;
+      max-height: inherit;
+      background: var(--mat-sys-surface);
+      color: var(--mat-sys-on-surface);
+      overflow: hidden;
     }
+
+    /* HEADER --------------------------------------------------- */
 
     .dialog-header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      padding: 20px 24px 16px;
       gap: 12px;
+      padding: 20px 24px 16px;
+      background: var(--mat-sys-surface);
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+      flex-shrink: 0;
     }
 
-    .title-block { display: flex; align-items: center; gap: 14px; }
-    .emoji { font-size: 32px; line-height: 1; }
+    .title-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .emoji {
+      font-size: 32px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .title-text {
+      min-width: 0;
+    }
 
     .dialog-title {
       font-family: 'DM Serif Display', Georgia, serif;
@@ -210,6 +260,9 @@ export interface ExpenseDialogData {
       letter-spacing: -0.02em;
       margin-bottom: 2px;
       color: var(--mat-sys-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .dialog-subtitle {
@@ -217,13 +270,21 @@ export interface ExpenseDialogData {
       color: var(--mat-sys-on-surface-variant);
     }
 
+    .close-btn {
+      flex-shrink: 0;
+    }
+
+    /* BODY ----------------------------------------------------- */
+
     .dialog-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
       padding: 20px 24px;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      overflow-y: auto;
-      max-height: 70vh;
+      -webkit-overflow-scrolling: touch;
     }
 
     .row {
@@ -232,7 +293,11 @@ export interface ExpenseDialogData {
       gap: 12px;
     }
 
-    .pm-option { display: inline-flex; align-items: center; gap: 10px; }
+    .pm-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
 
     .pm-dot {
       display: inline-block;
@@ -246,6 +311,8 @@ export interface ExpenseDialogData {
       color: var(--mat-sys-on-surface-variant);
       font-size: 0.78rem;
     }
+
+    /* PREVIEW -------------------------------------------------- */
 
     .preview {
       margin-top: 8px;
@@ -273,7 +340,11 @@ export interface ExpenseDialogData {
       color: var(--mat-sys-on-surface-variant);
     }
 
-    .preview-title .mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .preview-title .mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
 
     .preview-text {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -285,21 +356,73 @@ export interface ExpenseDialogData {
       margin: 0;
     }
 
+    /* FOOTER --------------------------------------------------- */
+
     .dialog-footer {
       display: flex;
       justify-content: flex-end;
       gap: 8px;
-      padding: 16px 24px;
+      padding: 14px 24px;
+      background: var(--mat-sys-surface);
+      border-top: 1px solid var(--mat-sys-outline-variant);
+      flex-shrink: 0;
     }
 
+    .footer-cancel {
+      min-width: 100px;
+    }
+
+    .footer-save {
+      min-width: 140px;
+      border-radius: 999px !important;
+    }
+
+    .footer-save .mat-icon {
+      margin-right: 4px;
+    }
+
+    /* MOBILE ADJUSTMENTS --------------------------------------- */
+    /* These styles complement the global rules in styles.scss that change
+       the panel chrome (rounded corners, full-bleed) on small screens. */
+
     @media (max-width: 600px) {
-      .dialog { max-width: 100%; }
-      .dialog-header, .dialog-body, .dialog-footer {
-        padding-left: 16px;
-        padding-right: 16px;
+      .dialog-header {
+        padding: 16px 16px 14px;
       }
-      .row { grid-template-columns: 1fr; }
-      .dialog-title { font-size: 1.2rem; }
+
+      .dialog-body {
+        padding: 18px 16px;
+      }
+
+      .dialog-footer {
+        padding: 12px 16px;
+        /* Honor iOS home indicator safe area on PWA. */
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        gap: 10px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .dialog-title {
+        font-size: 1.2rem;
+      }
+
+      .emoji {
+        font-size: 28px;
+      }
+
+      .footer-cancel {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .footer-save {
+        min-width: 0;
+        flex: 2;
+        height: 48px !important;
+      }
     }
   `],
 })

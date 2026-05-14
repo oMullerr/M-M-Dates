@@ -23,8 +23,8 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ExpenseDialogService } from '../../core/services/expense-dialog.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
-import { ExpenseDialogComponent } from '../../shared/components/expense-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 
 type SortOption = 'date-desc' | 'date-asc' | 'value-desc' | 'value-asc';
@@ -54,6 +54,7 @@ export class ExpensesComponent {
   private readonly expenseService = inject(ExpenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
+  private readonly expenseDialog = inject(ExpenseDialogService);
   private readonly toast = inject(ToastService);
   readonly filter = inject(MonthFilterService);
 
@@ -115,19 +116,11 @@ export class ExpensesComponent {
   }
 
   openNew(): void {
-    this.dialog.open(ExpenseDialogComponent, {
-      data: {},
-      width: '560px',
-      maxWidth: '95vw',
-    });
+    this.expenseDialog.openNew();
   }
 
   openEdit(expense: Expense): void {
-    this.dialog.open(ExpenseDialogComponent, {
-      data: { expense },
-      width: '560px',
-      maxWidth: '95vw',
-    });
+    this.expenseDialog.openEdit(expense);
   }
 
   copyMessage(expense: Expense): void {

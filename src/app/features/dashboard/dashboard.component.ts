@@ -11,7 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog } from '@angular/material/dialog';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 
@@ -20,8 +19,8 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { ExpenseDialogService } from '../../core/services/expense-dialog.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
-import { ExpenseDialogComponent } from '../../shared/components/expense-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -44,7 +43,7 @@ import { ExpenseDialogComponent } from '../../shared/components/expense-dialog.c
 export class DashboardComponent {
   private readonly expenseService = inject(ExpenseService);
   private readonly settingsService = inject(SettingsService);
-  private readonly dialog = inject(MatDialog);
+  private readonly dialog = inject(ExpenseDialogService);
   private readonly themeService = inject(ThemeService);
 
   readonly filter = inject(MonthFilterService);
@@ -279,11 +278,7 @@ export class DashboardComponent {
   // ---------- Actions ----------
 
   openNewExpense(): void {
-    this.dialog.open(ExpenseDialogComponent, {
-      data: {},
-      width: '560px',
-      maxWidth: '95vw',
-    });
+    this.dialog.openNew();
   }
 
   colorForMethod(name: string): string {
