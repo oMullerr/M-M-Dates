@@ -22,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -41,6 +42,15 @@ import { ToastService } from '../../core/services/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="login-page">
+      <button
+        mat-icon-button
+        class="theme-toggle"
+        (click)="themeService.toggle()"
+        [matTooltip]="themeService.isDark() ? 'Modo claro' : 'Modo escuro'"
+      >
+        <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
       <div class="login-card-wrap fade-up">
         <div class="brand">
           <span class="brand-emoji">🍕</span>
@@ -212,15 +222,19 @@ import { ToastService } from '../../core/services/toast.service';
             </mat-tab-group>
           </mat-card-content>
         </mat-card>
-
-        <p class="footer-note">
-          Feito com 💕 para casais que cuidam do budget juntos.
-        </p>
       </div>
     </div>
   `,
   styles: [`
     :host { display: block; }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      color: var(--mat-sys-on-surface-variant);
+    }
 
     .login-page {
       min-height: 100vh;
@@ -309,6 +323,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  readonly themeService = inject(ThemeService);
 
   readonly activeTab = signal(0);
   readonly submitting = signal(false);
