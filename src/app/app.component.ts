@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   inject,
 } from '@angular/core';
@@ -8,6 +9,7 @@ import { RouterOutlet } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './core/services/auth.service';
+import { PwaService } from './core/services/pwa.service';
 import { ThemeService } from './core/services/theme.service';
 import { ShellComponent } from './layout/shell.component';
 
@@ -55,12 +57,17 @@ import { ShellComponent } from './layout/shell.component';
     }
   `],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   readonly auth = inject(AuthService);
+  private readonly pwa = inject(PwaService);
 
   // Injected so its effect runs at startup (DOM dark-theme class).
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private readonly themeService = inject(ThemeService);
 
   readonly showSplash = computed(() => this.auth.loading());
+
+  ngOnInit(): void {
+    this.pwa.init();
+  }
 }

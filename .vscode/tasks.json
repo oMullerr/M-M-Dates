@@ -13,7 +13,7 @@
       }
     },
     {
-      "label": "M&M Dates · start",
+      "label": "M&M Dates · start (dev)",
       "type": "shell",
       "command": "npm start",
       "isBackground": true,
@@ -36,6 +36,18 @@
       "presentation": {
         "reveal": "always",
         "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "M&M Dates · preview PWA (testa service worker)",
+      "type": "shell",
+      "command": "npm run preview:pwa",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
         "clear": true
       }
     }

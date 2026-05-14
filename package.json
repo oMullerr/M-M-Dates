@@ -1,12 +1,13 @@
 {
-  "name": "snack-budget",
+  "name": "mm-dates",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "watch": "ng build --watch --configuration development",
+    "preview:pwa": "ng build && npx http-server -p 8080 -c-1 dist/mm-dates/browser"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",
@@ -20,6 +21,7 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@angular/service-worker": "^18.2.0",
     "chart.js": "^4.4.0",
     "firebase": "^10.13.0",
     "ng2-charts": "^6.0.1",
@@ -31,6 +33,7 @@
     "@angular-devkit/build-angular": "^18.2.0",
     "@angular/cli": "^18.2.0",
     "@angular/compiler-cli": "^18.2.0",
+    "http-server": "^14.1.1",
     "typescript": "~5.5.2"
   }
 }

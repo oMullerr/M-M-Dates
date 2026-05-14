@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { AuthService } from '../core/services/auth.service';
+import { PwaService } from '../core/services/pwa.service';
 import { ThemeService } from '../core/services/theme.service';
 import { ToastService } from '../core/services/toast.service';
 import { MonthFilterComponent } from '../shared/components/month-filter.component';
@@ -95,6 +96,18 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
         </mat-nav-list>
 
         <div class="sidenav-footer">
+          @if (pwa.canInstall()) {
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="installApp()"
+              class="install-btn"
+            >
+              <mat-icon>install_mobile</mat-icon>
+              Instalar app
+            </button>
+          }
+
           <button
             mat-stroked-button
             (click)="themeService.toggle()"
@@ -260,6 +273,15 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
 
     .theme-btn .mat-icon { margin-right: 8px; }
 
+    .install-btn {
+      width: 100%;
+      border-radius: 14px !important;
+      justify-content: flex-start !important;
+      height: 44px !important;
+    }
+
+    .install-btn .mat-icon { margin-right: 8px; }
+
     .user-block {
       display: flex;
       align-items: center;
@@ -379,6 +401,7 @@ export class ShellComponent {
   private readonly toast = inject(ToastService);
   readonly themeService = inject(ThemeService);
   readonly auth = inject(AuthService);
+  readonly pwa = inject(PwaService);
 
   readonly isHandset = signal(false);
 
@@ -390,6 +413,13 @@ export class ShellComponent {
 
   closeIfHandset(): void {
     if (this.isHandset()) this.sidenav?.close();
+  }
+
+  async installApp(): Promise<void> {
+    const installed = await this.pwa.promptInstall();
+    if (installed) {
+      this.closeIfHandset();
+    }
   }
 
   async signOut(): Promise<void> {
