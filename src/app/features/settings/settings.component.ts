@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ViewChild,
-  ElementRef,
   computed,
   effect,
   inject,
@@ -22,9 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 
 import { PaymentMethod } from '../../core/models';
+import { AuthService } from '../../core/services/auth.service';
 import { SettingsService } from '../../core/services/settings.service';
-import { ExpenseService } from '../../core/services/expense.service';
-import { StorageService } from '../../core/services/storage.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
@@ -58,15 +55,12 @@ const BUDGET_PRESETS = [800, 1200, 1600, 2000, 2500, 3000];
   styleUrl: './settings.component.scss',
 })
 export class SettingsComponent {
-  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
-
   private readonly fb = inject(FormBuilder);
   private readonly settingsService = inject(SettingsService);
-  private readonly expenseService = inject(ExpenseService);
-  private readonly storage = inject(StorageService);
   private readonly dialog = inject(MatDialog);
   private readonly toast = inject(ToastService);
   readonly themeService = inject(ThemeService);
+  readonly auth = inject(AuthService);
 
   readonly budgetPresets = BUDGET_PRESETS;
   readonly savingBudget = signal(false);
@@ -78,6 +72,8 @@ export class SettingsComponent {
   readonly paymentMethods = computed(
     () => this.settingsService.settings()?.paymentMethods ?? [],
   );
+
+  readonly coupleId = computed(() => this.auth.currentUser()?.coupleId ?? '');
 
   readonly budgetForm = this.fb.nonNullable.group({
     value: [0, [Validators.required, Validators.min(1)]],
@@ -139,7 +135,10 @@ export class SettingsComponent {
       PaymentMethodDialogData,
       PaymentMethod
     >(PaymentMethodDialogComponent, {
-      data: { method, existingNames: this.paymentMethods().map((m) => m.name) },
+      data: {
+        method,
+        existingNames: this.paymentMethods().map((m) => m.name),
+      },
       width: '460px',
       maxWidth: '95vw',
     });
@@ -178,67 +177,14 @@ export class SettingsComponent {
     });
   }
 
-  // ---------- BACKUP / RESTORE ----------
+  // ---------- Compartilhar casal ----------
 
-  exportBackup(): void {
-    const json = this.storage.exportAll();
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const today = new Date().toISOString().slice(0, 10);
-    a.href = url;
-    a.download = `snack-budget-${today}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    this.toast.success('Backup baixado 💾');
-  }
-
-  triggerImport(): void {
-    this.fileInput?.nativeElement.click();
-  }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        this.storage.importAll(reader.result as string);
-        this.expenseService.refresh();
-        this.settingsService.refresh();
-        this.toast.success('Backup importado com sucesso 🎉');
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Arquivo inválido';
-        this.toast.error(msg);
-      }
-      // Reset input so the same file can be selected again later.
-      input.value = '';
-    };
-    reader.readAsText(file);
-  }
-
-  resetAll(): void {
-    const ref = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Resetar tudo?',
-        message:
-          'Todos os gastos e configurações voltarão para os valores iniciais. Essa ação não pode ser desfeita.',
-        confirmLabel: 'Resetar',
-        cancelLabel: 'Cancelar',
-        destructive: true,
-      },
-    });
-
-    ref.afterClosed().subscribe((confirmed) => {
-      if (!confirmed) return;
-      this.storage.resetAll();
-      this.expenseService.refresh();
-      this.settingsService.refresh();
-      this.toast.success('Tudo resetado 🔄');
-    });
+  copyCoupleId(): void {
+    const id = this.coupleId();
+    if (!id) return;
+    navigator.clipboard
+      .writeText(id)
+      .then(() => this.toast.success('Código copiado ✨'))
+      .catch(() => this.toast.error('Não consegui copiar 😢'));
   }
 }

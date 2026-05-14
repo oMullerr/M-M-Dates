@@ -50,3 +50,28 @@ export interface MonthSummary {
 }
 
 export type ThemeMode = 'light' | 'dark';
+
+/* ---------- Auth & multi-user ---------- */
+
+/** User profile stored at /users/{uid}. Links a Firebase Auth user to a couple. */
+export interface User {
+  /** Firebase Auth UID */
+  uid: string;
+  email: string;
+  /** Display name, e.g. "Math" or "Mari" — also used as the owner in payment methods */
+  displayName: string;
+  /** ID of the couple this user belongs to */
+  coupleId: string;
+}
+
+/** A couple is a shared workspace where two (or more) users see the same data. */
+export interface Couple {
+  /** Auto-generated Firestore ID — shared as the "invite code" */
+  id: string;
+  /** Friendly name, e.g. "Math & Mari" */
+  name: string;
+  /** UIDs of all users that belong to this couple */
+  memberUids: string[];
+  /** Unix timestamp (ms) */
+  createdAt: number;
+}

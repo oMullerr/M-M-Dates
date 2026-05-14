@@ -1,30 +1,56 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, from } from 'rxjs';
+
 import { PaymentMethod, Settings } from '../models';
-import { StorageService } from './storage.service';
+import { AuthService } from './auth.service';
+import { FirestoreService } from './firestore.service';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private readonly storage = inject(StorageService);
+  private readonly auth = inject(AuthService);
+  private readonly firestore = inject(FirestoreService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly _settings = signal<Settings | null>(null);
   readonly settings = this._settings.asReadonly();
 
-  load(): Observable<Settings> {
-    const data = this.storage.readSettings();
-    this._settings.set(data);
-    return of(data);
+  private currentSub: { unsubscribe(): void } | null = null;
+
+  constructor() {
+    effect(() => {
+      const user = this.auth.currentUser();
+      this.teardownSubscription();
+
+      if (!user?.coupleId) {
+        this._settings.set(null);
+        return;
+      }
+
+      this.currentSub = this.firestore
+        .watchSettings(user.coupleId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (s) => this._settings.set(s),
+          error: (err) => {
+            console.error('[settings] Erro ao escutar Firestore', err);
+            this._settings.set(null);
+          },
+        });
+    });
   }
 
-  /** Re-reads from storage. Use after external mutations (import, reset). */
-  refresh(): void {
-    this._settings.set(this.storage.readSettings());
+  /** No-op kept for backward compatibility — the live signal is auto-fed. */
+  load(): Observable<Settings | null> {
+    return new Observable<Settings | null>((sub) => {
+      sub.next(this._settings());
+      sub.complete();
+    });
   }
 
   update(settings: Settings): Observable<Settings> {
-    this._settings.set(settings);
-    this.storage.writeSettings(settings);
-    return of(settings);
+    const coupleId = this.auth.requireCoupleId();
+    return from(this.firestore.setSettings(coupleId, settings).then(() => settings));
   }
 
   updateMonthlyBudget(value: number): Observable<Settings> {
@@ -61,5 +87,10 @@ export class SettingsService {
     const c = this._settings();
     if (!c) throw new Error('Settings have not been loaded yet.');
     return c;
+  }
+
+  private teardownSubscription(): void {
+    this.currentSub?.unsubscribe();
+    this.currentSub = null;
   }
 }

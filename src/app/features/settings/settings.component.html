@@ -121,10 +121,20 @@
               <strong>{{ method.name }}</strong>
               <small>{{ method.owner }}</small>
             </div>
-            <button mat-icon-button (click)="openEditMethod(method)" matTooltip="Editar" aria-label="Editar">
+            <button
+              mat-icon-button
+              (click)="openEditMethod(method)"
+              matTooltip="Editar"
+              aria-label="Editar"
+            >
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button (click)="removeMethod(method)" matTooltip="Remover" aria-label="Remover">
+            <button
+              mat-icon-button
+              (click)="removeMethod(method)"
+              matTooltip="Remover"
+              aria-label="Remover"
+            >
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -140,49 +150,35 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- BACKUP -->
+  <!-- COMPARTILHAR CASAL -->
   <mat-card class="settings-card">
     <mat-card-content>
       <header class="section-header">
         <div class="card-row-icon icon-accent">
-          <mat-icon>cloud_sync</mat-icon>
+          <mat-icon>group</mat-icon>
         </div>
         <div class="section-title-block">
-          <h2>Backup & Restauração</h2>
-          <p>Seus dados ficam salvos no navegador. Exporte para fazer backup ou sincronizar entre dispositivos</p>
+          <h2>Compartilhar com seu par</h2>
+          <p>Envie este código para sua/seu parceira(o) entrar no mesmo casal e ver os mesmos dados em tempo real</p>
         </div>
       </header>
 
-      <div class="backup-actions">
-        <button mat-stroked-button (click)="exportBackup()" class="backup-btn">
-          <mat-icon>download</mat-icon>
-          Exportar backup
+      <div class="couple-id-block">
+        <div class="couple-id-row">
+          <span class="couple-id-label">Código do casal</span>
+          <code class="couple-id-value">{{ coupleId() }}</code>
+        </div>
+        <button mat-flat-button color="primary" (click)="copyCoupleId()" class="copy-btn">
+          <mat-icon>content_copy</mat-icon>
+          Copiar código
         </button>
-
-        <button mat-stroked-button (click)="triggerImport()" class="backup-btn">
-          <mat-icon>upload</mat-icon>
-          Importar backup
-        </button>
-
-        <button mat-stroked-button color="warn" (click)="resetAll()" class="backup-btn">
-          <mat-icon>restart_alt</mat-icon>
-          Resetar tudo
-        </button>
-
-        <input
-          #fileInput
-          type="file"
-          accept=".json,application/json"
-          (change)="onFileSelected($event)"
-          style="display: none"
-        />
       </div>
 
-      <div class="backup-hint">
+      <div class="couple-hint">
         <mat-icon>info</mat-icon>
         <p>
-          Para usar os mesmos dados em outro dispositivo, exporte o backup aqui e importe lá.
-          O navegador guarda os dados localmente — eles não são compartilhados automaticamente.
+          Sua/seu par precisa criar uma conta na tela de login e colar este código no campo
+          <strong>"Código do casal"</strong>. Aí vocês passam a ver os mesmos dados em qualquer dispositivo.
         </p>
       </div>
     </mat-card-content>

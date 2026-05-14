@@ -1,46 +1,77 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Expense, MonthSummary, Settings } from '../models';
-import { StorageService } from './storage.service';
+import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, from } from 'rxjs';
 
+import { Expense, MonthSummary, Settings } from '../models';
+import { AuthService } from './auth.service';
+import { FirestoreService } from './firestore.service';
+
+/**
+ * Owns the expenses signal for the current couple.
+ * Subscribes to live updates from Firestore whenever a user is logged in,
+ * and unsubscribes when they log out.
+ */
 @Injectable({ providedIn: 'root' })
 export class ExpenseService {
-  private readonly storage = inject(StorageService);
+  private readonly auth = inject(AuthService);
+  private readonly firestore = inject(FirestoreService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly _expenses = signal<Expense[]>([]);
   readonly expenses = this._expenses.asReadonly();
 
-  list(): Observable<Expense[]> {
-    const data = this.storage.readExpenses();
-    this._expenses.set(data);
-    return of(data);
+  private currentSub: { unsubscribe(): void } | null = null;
+
+  constructor() {
+    // Auto-(re)subscribe whenever the current user changes.
+    effect(() => {
+      const user = this.auth.currentUser();
+      this.teardownSubscription();
+
+      if (!user?.coupleId) {
+        this._expenses.set([]);
+        return;
+      }
+
+      this.currentSub = this.firestore
+        .watchExpenses(user.coupleId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (items) => this._expenses.set(items),
+          error: (err) => {
+            console.error('[expense] Erro ao escutar Firestore', err);
+            this._expenses.set([]);
+          },
+        });
+    });
   }
 
-  /** Re-reads from storage. Use after external mutations (import, reset). */
-  refresh(): void {
-    this._expenses.set(this.storage.readExpenses());
+  /**
+   * No-op kept for backward compatibility with the previous local-storage
+   * implementation. The signal is already kept up-to-date via onSnapshot.
+   */
+  list(): Observable<Expense[]> {
+    return new Observable<Expense[]>((sub) => {
+      sub.next(this._expenses());
+      sub.complete();
+    });
   }
 
   create(expense: Omit<Expense, 'id'>): Observable<Expense> {
-    const created: Expense = { ...expense, id: this.storage.generateId() };
-    const next = [...this._expenses(), created];
-    this._expenses.set(next);
-    this.storage.writeExpenses(next);
-    return of(created);
+    const coupleId = this.auth.requireCoupleId();
+    return from(
+      this.firestore.addExpense(coupleId, expense).then((id) => ({ ...expense, id })),
+    );
   }
 
   update(expense: Expense): Observable<Expense> {
-    const next = this._expenses().map((e) => (e.id === expense.id ? expense : e));
-    this._expenses.set(next);
-    this.storage.writeExpenses(next);
-    return of(expense);
+    const coupleId = this.auth.requireCoupleId();
+    return from(this.firestore.updateExpense(coupleId, expense).then(() => expense));
   }
 
   remove(id: string): Observable<void> {
-    const next = this._expenses().filter((e) => e.id !== id);
-    this._expenses.set(next);
-    this.storage.writeExpenses(next);
-    return of(void 0);
+    const coupleId = this.auth.requireCoupleId();
+    return from(this.firestore.removeExpense(coupleId, id));
   }
 
   /* ---------- Pure helpers (used by computed signals) ---------- */
@@ -127,11 +158,18 @@ export class ExpenseService {
       `Forma de pagamento: ${expense.paymentMethod}`,
     ];
 
-    Object.keys(perOwner).sort().forEach((o) => {
-      lines.push(`Budget ${o} restante: R$ ${fmt(perOwner[o])}`);
-    });
+    Object.keys(perOwner)
+      .sort()
+      .forEach((o) => {
+        lines.push(`Budget ${o} restante: R$ ${fmt(perOwner[o])}`);
+      });
 
     lines.push(`Budget total restante: R$ ${fmt(summary.remaining)}`);
     return lines.join('\n');
+  }
+
+  private teardownSubscription(): void {
+    this.currentSub?.unsubscribe();
+    this.currentSub = null;
   }
 }

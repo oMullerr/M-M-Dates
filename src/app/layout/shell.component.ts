@@ -7,7 +7,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,8 +16,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 
+import { AuthService } from '../core/services/auth.service';
 import { ThemeService } from '../core/services/theme.service';
+import { ToastService } from '../core/services/toast.service';
 import { MonthFilterComponent } from '../shared/components/month-filter.component';
 
 @Component({
@@ -35,6 +38,7 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
     MatListModule,
     MatDividerModule,
     MatTooltipModule,
+    MatMenuModule,
     MonthFilterComponent,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -99,6 +103,24 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
             <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             {{ themeService.isDark() ? 'Modo claro' : 'Modo escuro' }}
           </button>
+
+          @if (auth.currentUser(); as user) {
+            <div class="user-block">
+              <div class="user-avatar">{{ initials(user.displayName) }}</div>
+              <div class="user-info">
+                <strong>{{ user.displayName }}</strong>
+                <small>{{ user.email }}</small>
+              </div>
+              <button
+                mat-icon-button
+                (click)="signOut()"
+                matTooltip="Sair"
+                aria-label="Sair"
+              >
+                <mat-icon>logout</mat-icon>
+              </button>
+            </div>
+          }
         </div>
       </mat-sidenav>
 
@@ -128,6 +150,27 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
             >
               <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
+          } @else if (auth.currentUser()) {
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="userMenu"
+              aria-label="Conta"
+            >
+              <mat-icon>account_circle</mat-icon>
+            </button>
+            <mat-menu #userMenu="matMenu">
+              @if (auth.currentUser(); as u) {
+                <div class="menu-user">
+                  <strong>{{ u.displayName }}</strong>
+                  <small>{{ u.email }}</small>
+                </div>
+                <mat-divider />
+              }
+              <button mat-menu-item (click)="signOut()">
+                <mat-icon>logout</mat-icon>
+                Sair
+              </button>
+            </mat-menu>
           }
         </mat-toolbar>
 
@@ -184,10 +227,7 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
       letter-spacing: 0.02em;
     }
 
-    .nav {
-      padding: 12px 8px;
-      flex: 1;
-    }
+    .nav { padding: 12px 8px; flex: 1; }
 
     .nav .mdc-list-item {
       border-radius: 14px;
@@ -205,7 +245,12 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
       font-weight: 600;
     }
 
-    .sidenav-footer { padding: 12px 16px 18px; }
+    .sidenav-footer {
+      padding: 12px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
     .theme-btn {
       width: 100%;
@@ -214,6 +259,71 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
     }
 
     .theme-btn .mat-icon { margin-right: 8px; }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--mat-sys-surface-container);
+      border: 1px solid var(--mat-sys-outline-variant);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-info strong {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--mat-sys-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+
+    .user-info small {
+      font-size: 0.72rem;
+      color: var(--mat-sys-on-surface-variant);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    .menu-user {
+      padding: 12px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .menu-user strong {
+      font-size: 0.9rem;
+      color: var(--mat-sys-on-surface);
+    }
+
+    .menu-user small {
+      font-size: 0.78rem;
+      color: var(--mat-sys-on-surface-variant);
+    }
 
     .content {
       background: var(--mat-sys-surface);
@@ -233,11 +343,7 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
       min-height: 64px;
     }
 
-    .topbar-brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .topbar-brand { display: inline-flex; align-items: center; gap: 10px; }
 
     .topbar-emoji { font-size: 22px; }
 
@@ -269,7 +375,10 @@ export class ShellComponent {
   @ViewChild('sidenav') sidenav?: MatSidenav;
 
   private readonly breakpoints = inject(BreakpointObserver);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   readonly themeService = inject(ThemeService);
+  readonly auth = inject(AuthService);
 
   readonly isHandset = signal(false);
 
@@ -281,5 +390,22 @@ export class ShellComponent {
 
   closeIfHandset(): void {
     if (this.isHandset()) this.sidenav?.close();
+  }
+
+  async signOut(): Promise<void> {
+    try {
+      await this.auth.signOut();
+      this.toast.info('Até logo! 👋');
+      this.router.navigateByUrl('/login');
+    } catch {
+      this.toast.error('Não foi possível sair. Tente novamente.');
+    }
+  }
+
+  initials(name: string): string {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }
