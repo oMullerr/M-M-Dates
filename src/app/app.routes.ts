@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>
@@ -30,5 +30,5 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then((m) => m.SettingsComponent),
     title: 'Configurações · M&M Dates',
   },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'login' },
 ];
