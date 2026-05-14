@@ -57,7 +57,7 @@ import { MonthFilterComponent } from '../shared/components/month-filter.componen
           <span class="brand-emoji">🍕</span>
           <div class="brand-text">
             <strong>M&M Dates</strong>
-            <small>Math &amp; Mari 💕</small>
+            <small>Mari &amp; Math 💕</small>
           </div>
         </div>
 

@@ -10,13 +10,8 @@
       </div>
     </div>
 
-    <button
-      mat-flat-button
-      color="primary"
-      class="hero-cta"
-      (click)="openNewExpense()"
-    >
-      <mat-icon>add</mat-icon>
+    <button mat-flat-button color="primary" class="hero-cta" (click)="openNewExpense()">
+      <mat-icon style="margin-bottom: 5px;">add</mat-icon>
       Novo lanchinho
     </button>
   </header>
@@ -71,13 +66,12 @@
           {{ summary().remaining | brl }}
         </div>
         <div class="summary-foot">
-          @if (summary().remaining < 0) {
-            <mat-icon>priority_high</mat-icon>
+          @if (summary().remaining < 0) { <mat-icon>priority_high</mat-icon>
             <span>Estourou o budget</span>
-          } @else {
+            } @else {
             <mat-icon>check_circle</mat-icon>
             <span>Disponível</span>
-          }
+            }
         </div>
       </mat-card-content>
     </mat-card>
@@ -94,11 +88,7 @@
           {{ summary().percentSpent.toFixed(0) }}%
         </div>
         <div class="summary-foot">
-          <mat-progress-bar
-            mode="determinate"
-            [value]="Math.min(summary().percentSpent, 100)"
-            class="thin-progress"
-          />
+          <mat-progress-bar mode="determinate" [value]="Math.min(summary().percentSpent, 100)" class="thin-progress" />
         </div>
       </mat-card-content>
     </mat-card>
@@ -112,7 +102,6 @@
         <header class="card-header">
           <div>
             <h3 class="card-title">Progresso do mês</h3>
-            <p class="card-subtitle">Quanto já saiu vs. o que ainda dá para gastar</p>
           </div>
           <span class="status-chip" [style.--chip-color]="statusInfo().color">
             <span class="status-dot"></span>
@@ -122,11 +111,8 @@
 
         <div class="progress-block">
           <div class="progress-bar-host">
-            <mat-progress-bar
-              mode="determinate"
-              [value]="Math.min(summary().percentSpent, 100)"
-              class="thick-progress"
-            />
+            <mat-progress-bar mode="determinate" [value]="Math.min(summary().percentSpent, 100)"
+              class="thick-progress" />
             <div class="bar-labels">
               <span>R$ 0</span>
               <span>{{ summary().monthlyBudget | brl }}</span>
@@ -143,10 +129,7 @@
             <mat-divider [vertical]="true"></mat-divider>
             <div class="stat">
               <span class="stat-label">Restante</span>
-              <strong
-                class="stat-value serif numeric"
-                [class.negative]="summary().remaining < 0"
-              >
+              <strong class="stat-value serif numeric" [class.negative]="summary().remaining < 0">
                 {{ summary().remaining | brl }}
               </strong>
             </div>
@@ -161,36 +144,30 @@
         <header class="card-header">
           <div>
             <h3 class="card-title">Por forma de pagamento</h3>
-            <p class="card-subtitle">Quem pagou o quê esse mês</p>
           </div>
         </header>
 
         @if (summary().count > 0) {
-          <div class="doughnut-wrap">
-            <canvas
-              baseChart
-              [type]="'doughnut'"
-              [data]="doughnutData()"
-              [options]="doughnutOptions"
-            ></canvas>
-          </div>
+        <div class="doughnut-wrap">
+          <canvas baseChart [type]="'doughnut'" [data]="doughnutData()" [options]="doughnutOptions"></canvas>
+        </div>
 
-          <div class="legend">
-            @for (item of methodLegend(); track item.name) {
-              <div class="legend-item">
-                <span class="legend-dot" [style.background]="item.color"></span>
-                <div class="legend-info">
-                  <strong>{{ item.name }}</strong>
-                  <span class="numeric">{{ item.value | brl }}</span>
-                </div>
-              </div>
-            }
+        <div class="legend">
+          @for (item of methodLegend(); track item.name) {
+          <div class="legend-item">
+            <span class="legend-dot" [style.background]="item.color"></span>
+            <div class="legend-info">
+              <strong>{{ item.name }}</strong>
+              <span class="numeric">{{ item.value | brl }}</span>
+            </div>
           </div>
+          }
+        </div>
         } @else {
-          <div class="empty">
-            <mat-icon>pie_chart</mat-icon>
-            <p>Sem dados nesse mês</p>
-          </div>
+        <div class="empty">
+          <mat-icon>pie_chart</mat-icon>
+          <p>Sem dados nesse mês</p>
+        </div>
         }
       </mat-card-content>
     </mat-card>
@@ -201,24 +178,18 @@
         <header class="card-header">
           <div>
             <h3 class="card-title">Gastos por pessoa</h3>
-            <p class="card-subtitle">Quem está patrocinando mais os dates</p>
           </div>
         </header>
 
         @if (summary().count > 0) {
-          <div class="chart-host">
-            <canvas
-              baseChart
-              [type]="'bar'"
-              [data]="barData()"
-              [options]="barOptions"
-            ></canvas>
-          </div>
+        <div class="chart-host">
+          <canvas baseChart [type]="'bar'" [data]="barData()" [options]="barOptions"></canvas>
+        </div>
         } @else {
-          <div class="empty">
-            <mat-icon>bar_chart</mat-icon>
-            <p>Sem dados nesse mês</p>
-          </div>
+        <div class="empty">
+          <mat-icon>bar_chart</mat-icon>
+          <p>Sem dados nesse mês</p>
+        </div>
         }
       </mat-card-content>
     </mat-card>
@@ -234,19 +205,14 @@
         </header>
 
         @if (summary().count > 0) {
-          <div class="chart-host line-host">
-            <canvas
-              baseChart
-              [type]="'line'"
-              [data]="lineData()"
-              [options]="lineOptions"
-            ></canvas>
-          </div>
+        <div class="chart-host line-host">
+          <canvas baseChart [type]="'line'" [data]="lineData()" [options]="lineOptions"></canvas>
+        </div>
         } @else {
-          <div class="empty">
-            <mat-icon>show_chart</mat-icon>
-            <p>Adicione gastos para ver a evolução</p>
-          </div>
+        <div class="empty">
+          <mat-icon>show_chart</mat-icon>
+          <p>Adicione gastos para ver a evolução</p>
+        </div>
         }
       </mat-card-content>
     </mat-card>
@@ -267,24 +233,24 @@
       </header>
 
       @if (recentExpenses().length > 0) {
-        <ul class="recent-list">
-          @for (exp of recentExpenses(); track exp.id) {
-            <li class="recent-item">
-              <span class="recent-bar" [style.background]="colorForMethod(exp.paymentMethod)"></span>
-              <div class="recent-info">
-                <strong>{{ exp.location }}</strong>
-                <small>{{ exp.date }} · {{ exp.paymentMethod }}</small>
-              </div>
-              <span class="recent-value serif numeric">{{ exp.value | brl }}</span>
-            </li>
-          }
-        </ul>
+      <ul class="recent-list">
+        @for (exp of recentExpenses(); track exp.id) {
+        <li class="recent-item">
+          <span class="recent-bar" [style.background]="colorForMethod(exp.paymentMethod)"></span>
+          <div class="recent-info">
+            <strong>{{ exp.location }}</strong>
+            <small>{{ exp.date }} · {{ exp.paymentMethod }}</small>
+          </div>
+          <span class="recent-value serif numeric">{{ exp.value | brl }}</span>
+        </li>
+        }
+      </ul>
       } @else {
-        <div class="empty">
-          <span class="empty-emoji">🍕</span>
-          <h4>Sem lanchinhos esse mês</h4>
-          <p>Bora registrar o primeiro date?</p>
-        </div>
+      <div class="empty">
+        <span class="empty-emoji">🍕</span>
+        <h4>Sem lanchinhos esse mês</h4>
+        <p>Bora registrar o primeiro date?</p>
+      </div>
       }
     </mat-card-content>
   </mat-card>
