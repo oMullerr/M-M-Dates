@@ -74,6 +74,10 @@ export class ExpenseService {
     return from(this.firestore.removeExpense(coupleId, id));
   }
 
+  findById(id: string): Expense | undefined {
+    return this._expenses().find((e) => e.id === id);
+  }
+
   /* ---------- Pure helpers (used by computed signals) ---------- */
 
   filterByMonth(month: number, year: number): Expense[] {

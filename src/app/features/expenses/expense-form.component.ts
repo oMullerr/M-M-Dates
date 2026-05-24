@@ -2,16 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
+  input,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -25,31 +23,12 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { ToastService } from '../../core/services/toast.service';
 
-export interface ExpenseDialogData {
-  expense?: Expense;
-}
-
-/**
- * Expense create/edit dialog.
- *
- * Layout:
- * - Desktop  → floating card centered on the viewport, max-width 560px, rounded corners
- * - Mobile   → fullscreen "bottom-sheet" feel (rounded top corners, footer pinned to bottom)
- *
- * Mobile/desktop differences live in CSS via the `expense-dialog-panel--mobile`
- * class added by `ExpenseDialogService` when the viewport is narrow.
- *
- * The structure is a stable 3-row flexbox: header (sticky), body (scrolls),
- * footer (sticky). The body grows to fill available height so the form is
- * always visible without users needing to scroll past tabs/banners.
- */
 @Component({
-  selector: 'app-expense-dialog',
+  selector: 'app-expense-form',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -60,31 +39,31 @@ export interface ExpenseDialogData {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dialog">
-      <header class="dialog-header">
-        <div class="title-block">
-          <span class="emoji" aria-hidden="true">🍕</span>
-          <div class="title-text">
-            <h2 class="dialog-title">
-              {{ isEdit() ? 'Editar lanchinho' : 'Oh o lanchinho!!' }}
-            </h2>
-            <p class="dialog-subtitle">
-              {{ isEdit() ? 'Atualize os detalhes do registro' : 'Registre um novo date 💕' }}
-            </p>
-          </div>
-        </div>
+    <div class="form-page fade-up">
+      <header class="form-header">
         <button
           mat-icon-button
           type="button"
           (click)="cancel()"
-          aria-label="Fechar"
-          class="close-btn"
+          aria-label="Voltar"
+          class="back-btn"
         >
-          <mat-icon>close</mat-icon>
+          <mat-icon>arrow_back</mat-icon>
         </button>
+        <div class="title-block">
+          <span class="emoji" aria-hidden="true">🍕</span>
+          <div class="title-text">
+            <h1 class="form-title">
+              {{ isEdit() ? 'Editar lanchinho' : 'Oh o lanchinho!!' }}
+            </h1>
+            <p class="form-subtitle">
+              {{ isEdit() ? 'Atualize os detalhes do registro' : 'Registre um novo date 💕' }}
+            </p>
+          </div>
+        </div>
       </header>
 
-      <form [formGroup]="form" (ngSubmit)="save()" class="dialog-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="form-body">
         <div class="row">
           <mat-form-field appearance="outline">
             <mat-label>Data</mat-label>
@@ -175,7 +154,7 @@ export interface ExpenseDialogData {
         }
       </form>
 
-      <footer class="dialog-footer">
+      <footer class="form-footer">
         <button
           mat-button
           type="button"
@@ -208,32 +187,24 @@ export interface ExpenseDialogData {
   styles: [`
     :host {
       display: block;
-      width: 100%;
-      height: 100%;
     }
 
-    .dialog {
+    .form-page {
       display: flex;
       flex-direction: column;
-      width: 100%;
-      height: 100%;
-      max-height: inherit;
-      background: var(--mat-sys-surface);
-      color: var(--mat-sys-on-surface);
-      overflow: hidden;
+      gap: 0;
+      max-width: 720px;
+      margin: 0 auto;
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
     /* HEADER --------------------------------------------------- */
 
-    .dialog-header {
+    .form-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
-      padding: 20px 24px 16px;
-      background: var(--mat-sys-surface);
-      border-bottom: 1px solid var(--mat-sys-outline-variant);
-      flex-shrink: 0;
+      padding: 4px 0 20px;
     }
 
     .title-block {
@@ -245,7 +216,7 @@ export interface ExpenseDialogData {
     }
 
     .emoji {
-      font-size: 32px;
+      font-size: 36px;
       line-height: 1;
       flex-shrink: 0;
     }
@@ -254,37 +225,34 @@ export interface ExpenseDialogData {
       min-width: 0;
     }
 
-    .dialog-title {
+    .form-title {
       font-family: 'DM Serif Display', Georgia, serif;
-      font-size: 1.4rem;
+      font-size: 1.75rem;
       letter-spacing: -0.02em;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       color: var(--mat-sys-on-surface);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      line-height: 1.1;
     }
 
-    .dialog-subtitle {
-      font-size: 0.85rem;
+    .form-subtitle {
+      font-size: 0.9rem;
       color: var(--mat-sys-on-surface-variant);
     }
 
-    .close-btn {
+    .back-btn {
       flex-shrink: 0;
     }
 
     /* BODY ----------------------------------------------------- */
 
-    .dialog-body {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 20px 24px;
+    .form-body {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      -webkit-overflow-scrolling: touch;
+      padding: 24px;
+      background: var(--mat-sys-surface-container-low);
+      border-radius: 20px;
+      border: 1px solid var(--mat-sys-outline-variant);
     }
 
     .row {
@@ -317,7 +285,7 @@ export interface ExpenseDialogData {
     .preview {
       margin-top: 8px;
       padding: 14px 16px;
-      background: var(--mat-sys-surface-container-low);
+      background: var(--mat-sys-surface);
       border: 1px dashed var(--mat-sys-outline-variant);
       border-radius: 14px;
     }
@@ -358,22 +326,19 @@ export interface ExpenseDialogData {
 
     /* FOOTER --------------------------------------------------- */
 
-    .dialog-footer {
+    .form-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      padding: 14px 24px;
-      background: var(--mat-sys-surface);
-      border-top: 1px solid var(--mat-sys-outline-variant);
-      flex-shrink: 0;
+      gap: 12px;
+      padding: 24px 0 0;
     }
 
     .footer-cancel {
-      min-width: 100px;
+      min-width: 120px;
     }
 
     .footer-save {
-      min-width: 140px;
+      min-width: 160px;
       border-radius: 999px !important;
     }
 
@@ -382,35 +347,32 @@ export interface ExpenseDialogData {
     }
 
     /* MOBILE ADJUSTMENTS --------------------------------------- */
-    /* These styles complement the global rules in styles.scss that change
-       the panel chrome (rounded corners, full-bleed) on small screens. */
 
     @media (max-width: 600px) {
-      .dialog-header {
-        padding: 16px 16px 14px;
+      .form-header {
+        padding: 0 0 16px;
       }
 
-      .dialog-body {
+      .emoji {
+        font-size: 28px;
+      }
+
+      .form-title {
+        font-size: 1.4rem;
+      }
+
+      .form-body {
         padding: 18px 16px;
-      }
-
-      .dialog-footer {
-        padding: 12px 16px;
-        /* Honor iOS home indicator safe area on PWA. */
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-        gap: 10px;
+        border-radius: 16px;
       }
 
       .row {
         grid-template-columns: 1fr;
       }
 
-      .dialog-title {
-        font-size: 1.2rem;
-      }
-
-      .emoji {
-        font-size: 28px;
+      .form-footer {
+        padding: 20px 0 0;
+        gap: 10px;
       }
 
       .footer-cancel {
@@ -426,16 +388,18 @@ export interface ExpenseDialogData {
     }
   `],
 })
-export class ExpenseDialogComponent {
+export class ExpenseFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly expenseService = inject(ExpenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly toast = inject(ToastService);
-  private readonly dialogRef = inject(MatDialogRef<ExpenseDialogComponent>);
-  private readonly data = inject<ExpenseDialogData>(MAT_DIALOG_DATA);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
+  readonly id = input<string | undefined>(undefined);
 
   readonly saving = signal(false);
-  readonly isEdit = computed(() => !!this.data?.expense);
+  readonly isEdit = computed(() => !!this.id());
   readonly paymentMethods = computed(
     () => this.settingsService.settings()?.paymentMethods ?? [],
   );
@@ -448,6 +412,8 @@ export class ExpenseDialogComponent {
   });
 
   private readonly formValue = signal(this.form.value);
+  private editLoaded = false;
+  private currentExpense?: Expense;
 
   readonly previewMessage = computed(() => {
     const v = this.formValue();
@@ -472,18 +438,31 @@ export class ExpenseDialogComponent {
   });
 
   constructor() {
-    if (this.data?.expense) {
-      this.form.patchValue({
-        date: this.data.expense.date,
-        location: this.data.expense.location,
-        value: this.data.expense.value,
-        paymentMethod: this.data.expense.paymentMethod,
-      });
-    } else {
-      this.form.patchValue({ date: this.todayBR() });
-    }
-
+    this.form.patchValue({ date: this.todayBR() });
     this.form.valueChanges.subscribe((v) => this.formValue.set(v));
+
+    effect(() => {
+      const id = this.id();
+      const list = this.expenseService.expenses();
+
+      if (!id || this.editLoaded) return;
+      if (list.length === 0) return;
+
+      const expense = list.find((e) => e.id === id);
+      if (!expense) {
+        this.router.navigateByUrl('/expenses');
+        return;
+      }
+
+      this.currentExpense = expense;
+      this.form.patchValue({
+        date: expense.date,
+        location: expense.location,
+        value: expense.value,
+        paymentMethod: expense.paymentMethod,
+      });
+      this.editLoaded = true;
+    });
   }
 
   formatDate(event: Event): void {
@@ -523,15 +502,15 @@ export class ExpenseDialogComponent {
 
     this.saving.set(true);
 
-    const obs$ = this.isEdit() && this.data.expense
-      ? this.expenseService.update({ ...this.data.expense, ...payload })
+    const obs$ = this.isEdit() && this.currentExpense
+      ? this.expenseService.update({ ...this.currentExpense, ...payload })
       : this.expenseService.create(payload);
 
     obs$.subscribe({
-      next: (result) => {
+      next: () => {
         this.toast.success(this.isEdit() ? 'Atualizado com sucesso 💕' : 'Lanchinho registrado 🍔');
         this.saving.set(false);
-        this.dialogRef.close(result);
+        this.router.navigateByUrl('/expenses');
       },
       error: () => {
         this.toast.error('Não foi possível salvar. Tente novamente.');
@@ -542,7 +521,11 @@ export class ExpenseDialogComponent {
 
   cancel(): void {
     if (this.saving()) return;
-    this.dialogRef.close();
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigateByUrl('/expenses');
+    }
   }
 
   private todayBR(): string {

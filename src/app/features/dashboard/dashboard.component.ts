@@ -19,7 +19,6 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { ExpenseDialogService } from '../../core/services/expense-dialog.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
 
 @Component({
@@ -43,7 +42,6 @@ import { BrlPipe } from '../../shared/pipes/brl.pipe';
 export class DashboardComponent {
   private readonly expenseService = inject(ExpenseService);
   private readonly settingsService = inject(SettingsService);
-  private readonly dialog = inject(ExpenseDialogService);
   private readonly themeService = inject(ThemeService);
 
   readonly filter = inject(MonthFilterService);
@@ -276,10 +274,6 @@ export class DashboardComponent {
   });
 
   // ---------- Actions ----------
-
-  openNewExpense(): void {
-    this.dialog.openNew();
-  }
 
   colorForMethod(name: string): string {
     const settings = this.settingsService.settings();

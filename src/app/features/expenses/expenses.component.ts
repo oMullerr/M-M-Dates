@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +24,6 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ExpenseDialogService } from '../../core/services/expense-dialog.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
 
@@ -35,6 +35,7 @@ type SortOption = 'date-desc' | 'date-asc' | 'value-desc' | 'value-asc';
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -54,7 +55,6 @@ export class ExpensesComponent {
   private readonly expenseService = inject(ExpenseService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
-  private readonly expenseDialog = inject(ExpenseDialogService);
   private readonly toast = inject(ToastService);
   readonly filter = inject(MonthFilterService);
 
@@ -113,14 +113,6 @@ export class ExpensesComponent {
 
   colorForMethod(name: string): string {
     return this.paymentMethods().find((p) => p.name === name)?.color || '#6750A4';
-  }
-
-  openNew(): void {
-    this.expenseDialog.openNew();
-  }
-
-  openEdit(expense: Expense): void {
-    this.expenseDialog.openEdit(expense);
   }
 
   copyMessage(expense: Expense): void {

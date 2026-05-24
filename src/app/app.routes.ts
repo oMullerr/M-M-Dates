@@ -53,9 +53,27 @@ export const routes: Routes = [
   {
     path: 'expenses',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/expenses/expenses.component').then((m) => m.ExpensesComponent),
-    title: 'Gastos · M&M Dates',
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/expenses/expenses.component').then((m) => m.ExpensesComponent),
+        title: 'Gastos · M&M Dates',
+      },
+      {
+        path: 'new',
+        loadComponent: () =>
+          import('./features/expenses/expense-form.component').then((m) => m.ExpenseFormComponent),
+        title: 'Novo lanchinho · M&M Dates',
+      },
+      {
+        path: ':id/edit',
+        loadComponent: () =>
+          import('./features/expenses/expense-form.component').then((m) => m.ExpenseFormComponent),
+        title: 'Editar lanchinho · M&M Dates',
+      },
+    ],
   },
   {
     path: 'settings',

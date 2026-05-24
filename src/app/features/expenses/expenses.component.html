@@ -6,10 +6,15 @@
       <h1 class="page-title">Gastos</h1>
       <p class="page-subtitle">Tudo que vocês registraram em {{ filter.label() }}</p>
     </div>
-    <button mat-flat-button color="primary" class="header-cta" (click)="openNew()">
+    <a
+      mat-flat-button
+      color="primary"
+      class="header-cta"
+      routerLink="/expenses/new"
+    >
       <mat-icon>add</mat-icon>
       Novo lanchinho
-    </button>
+    </a>
   </header>
 
   <!-- SUMMARY -->
@@ -151,10 +156,10 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="openEdit(expense)">
+                <a mat-menu-item [routerLink]="['/expenses', expense.id, 'edit']">
                   <mat-icon>edit</mat-icon>
                   Editar
-                </button>
+                </a>
                 <button mat-menu-item (click)="remove(expense)" class="menu-destructive">
                   <mat-icon>delete</mat-icon>
                   Excluir
@@ -190,13 +195,13 @@
   }
 
   <!-- FAB MOBILE -->
-  <button
+  <a
     mat-fab
     color="primary"
     class="fab-mobile"
-    (click)="openNew()"
+    routerLink="/expenses/new"
     aria-label="Novo lanchinho"
   >
     <mat-icon>add</mat-icon>
-  </button>
+  </a>
 </div>

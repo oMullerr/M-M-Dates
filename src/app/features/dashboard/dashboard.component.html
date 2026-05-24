@@ -10,10 +10,15 @@
       </div>
     </div>
 
-    <button mat-flat-button color="primary" class="hero-cta" (click)="openNewExpense()">
+    <a
+      mat-flat-button
+      color="primary"
+      class="hero-cta"
+      routerLink="/expenses/new"
+    >
       <mat-icon>add</mat-icon>
       Novo lanchinho
-    </button>
+    </a>
   </header>
 
   <!-- SUMMARY CARDS -->
