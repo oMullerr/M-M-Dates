@@ -1,0 +1,40 @@
+// ============================================================================
+//  REFERÊNCIA das regras do Firestore em produção (projeto mm-dates).
+//
+//  Este arquivo NÃO é publicado automaticamente (não está referenciado em
+//  firebase.json). Serve apenas como cópia versionada das regras do Console.
+//
+//  >>> A coleção `pushTokens` (desta feature de notificações) NÃO precisa de
+//      regra nova: o curinga recursivo `match /{document=**}` dentro de
+//      `couples/{coupleId}` já cobre qualquer subcoleção do casal, liberando a
+//      gravação dos tokens só para membros. A Cloud Function usa o Admin SDK e
+//      ignora as regras. <<<
+// ============================================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Perfis de usuários
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth.uid == userId;
+      allow update, delete: if request.auth.uid == userId;
+    }
+
+    // Casais
+    match /couples/{coupleId} {
+      // Qualquer usuário autenticado pode criar um casal novo
+      // ou ler/entrar em um existente
+      allow create: if request.auth != null;
+      allow read, update: if request.auth != null;
+
+      // Só membros do casal acessam dados internos
+      // (expenses, config, pushTokens, ...).
+      match /{document=**} {
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/couples/$(coupleId)).data.memberUids;
+      }
+    }
+  }
+}

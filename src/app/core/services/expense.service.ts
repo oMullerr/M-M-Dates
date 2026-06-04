@@ -59,8 +59,16 @@ export class ExpenseService {
 
   create(expense: Omit<Expense, 'id'>): Observable<Expense> {
     const coupleId = this.auth.requireCoupleId();
+    const user = this.auth.currentUser();
+    // Stamp who registered the expense so the Cloud Function can notify the
+    // *other* member(s) and show their name in the push notification.
+    const withAuthor: Omit<Expense, 'id'> = {
+      ...expense,
+      createdByUid: user?.uid,
+      createdByName: user?.displayName,
+    };
     return from(
-      this.firestore.addExpense(coupleId, expense).then((id) => ({ ...expense, id })),
+      this.firestore.addExpense(coupleId, withAuthor).then((id) => ({ ...withAuthor, id })),
     );
   }
 

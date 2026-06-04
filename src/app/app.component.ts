@@ -3,12 +3,14 @@ import {
   Component,
   OnInit,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from './core/services/auth.service';
+import { NotificationService } from './core/services/notification.service';
 import { PwaService } from './core/services/pwa.service';
 import { ThemeService } from './core/services/theme.service';
 import { ShellComponent } from './layout/shell.component';
@@ -60,12 +62,27 @@ import { ShellComponent } from './layout/shell.component';
 export class AppComponent implements OnInit {
   readonly auth = inject(AuthService);
   private readonly pwa = inject(PwaService);
+  private readonly notifications = inject(NotificationService);
 
   // Injected so its effect runs at startup (DOM dark-theme class).
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private readonly themeService = inject(ThemeService);
 
   readonly showSplash = computed(() => this.auth.loading());
+
+  private pushInitialized = false;
+
+  constructor() {
+    // Once a user is signed in, refresh their push token (if notifications were
+    // already granted) and start listening for foreground messages.
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (user?.coupleId && !this.pushInitialized) {
+        this.pushInitialized = true;
+        this.notifications.refreshTokenIfEnabled();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.pwa.init();

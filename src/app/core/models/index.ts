@@ -12,6 +12,12 @@ export interface Expense {
   value: number;
   /** Must match a name in Settings.paymentMethods */
   paymentMethod: string;
+  /** Unix timestamp (ms) — set on creation, used for ordering. */
+  createdAt?: number;
+  /** Firebase Auth UID of whoever registered the expense. */
+  createdByUid?: string;
+  /** Display name of whoever registered the expense (for notifications). */
+  createdByName?: string;
 }
 
 export interface PaymentMethod {
@@ -62,6 +68,26 @@ export interface User {
   displayName: string;
   /** ID of the couple this user belongs to */
   coupleId: string;
+}
+
+/**
+ * A push notification token for a single device, stored at
+ * /couples/{coupleId}/pushTokens/{token}. Doc id is the FCM token itself so
+ * re-registering the same device is idempotent (no duplicates).
+ */
+export interface PushToken {
+  /** FCM registration token (also the document id). */
+  token: string;
+  /** UID of the device owner — used to avoid notifying whoever created the expense. */
+  uid: string;
+  /** Display name of the owner, for debugging/inspection. */
+  displayName: string;
+  /** Rough platform hint, e.g. "ios" | "android" | "desktop". */
+  platform: string;
+  /** Unix timestamp (ms) of when the token was last (re)registered. */
+  createdAt: number;
+  /** Raw user agent string, for debugging. */
+  userAgent: string;
 }
 
 /** A couple is a shared workspace where two (or more) users see the same data. */

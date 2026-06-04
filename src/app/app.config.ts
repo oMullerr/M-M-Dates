@@ -8,6 +8,7 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getMessaging, provideMessaging } from '@angular/fire/messaging';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
@@ -27,6 +28,10 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
+    // FCM Messaging — the factory only runs when Messaging is injected, and
+    // NotificationService only injects it after confirming browser support, so
+    // unsupported browsers (e.g. iOS < 16.4) never construct it.
+    provideMessaging(() => getMessaging()),
 
     // PWA / Service Worker (only in production builds)
     provideServiceWorker('ngsw-worker.js', {

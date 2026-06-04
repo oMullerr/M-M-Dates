@@ -9,6 +9,13 @@
 npm-debug.log
 yarn-error.log
 
+# Firebase Functions
+/functions/node_modules
+/functions/lib
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+
 # IDEs and editors
 .idea/
 .project

@@ -15,7 +15,7 @@ import {
   updateDoc,
 } from '@angular/fire/firestore';
 
-import { Expense, Settings } from '../models';
+import { Expense, PushToken, Settings } from '../models';
 
 /**
  * Thin layer between the Firestore SDK and our domain services.
@@ -34,6 +34,10 @@ export class FirestoreService {
 
   private settingsRef(coupleId: string): DocumentReference<Settings> {
     return doc(this.firestore, 'couples', coupleId, 'config', 'settings') as DocumentReference<Settings>;
+  }
+
+  private pushTokensRef(coupleId: string): CollectionReference<PushToken> {
+    return collection(this.firestore, 'couples', coupleId, 'pushTokens') as CollectionReference<PushToken>;
   }
 
   // ---------- Expenses ----------
@@ -98,5 +102,17 @@ export class FirestoreService {
   async setSettings(coupleId: string, settings: Settings): Promise<void> {
     const { id, ...payload } = settings;
     await setDoc(this.settingsRef(coupleId), { ...payload, id } as Settings);
+  }
+
+  // ---------- Push tokens ----------
+
+  /** Upsert a device token. Doc id is the token itself, so it's idempotent. */
+  async savePushToken(coupleId: string, token: PushToken): Promise<void> {
+    await setDoc(doc(this.pushTokensRef(coupleId), token.token), token);
+  }
+
+  /** Remove a device token (e.g. when the user turns notifications off). */
+  async deletePushToken(coupleId: string, token: string): Promise<void> {
+    await deleteDoc(doc(this.pushTokensRef(coupleId), token));
   }
 }

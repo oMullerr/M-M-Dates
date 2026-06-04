@@ -25,6 +25,56 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- NOTIFICATIONS -->
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <div class="card-row">
+        <div class="card-row-icon icon-primary">
+          <mat-icon>notifications_active</mat-icon>
+        </div>
+        <div class="card-row-text">
+          <h2>Notificações</h2>
+          <p>Avise quando seu par registrar um novo gasto</p>
+        </div>
+        <mat-slide-toggle
+          [checked]="notifications.enabled()"
+          [disabled]="notifNeedsInstall() || !notifSupported() || savingNotif()"
+          (change)="onToggleNotifications($event)"
+          color="primary"
+        >
+          {{ notifications.enabled() ? 'Ligado' : 'Desligado' }}
+        </mat-slide-toggle>
+      </div>
+
+      @if (notifNeedsInstall()) {
+        <div class="couple-hint">
+          <mat-icon>install_mobile</mat-icon>
+          <p>
+            No iPhone/iPad, instale o app na tela inicial primeiro: toque em
+            <strong>Compartilhar</strong> e depois em <strong>"Adicionar à Tela de Início"</strong>.
+            Abra o app por lá e volte aqui para ativar.
+          </p>
+        </div>
+      } @else if (!notifSupported()) {
+        <div class="couple-hint">
+          <mat-icon>info</mat-icon>
+          <p>
+            Este dispositivo/navegador não suporta notificações push. No iPhone, é
+            necessário iOS 16.4 ou superior, com o app instalado na tela inicial.
+          </p>
+        </div>
+      } @else if (notifications.permission() === 'denied') {
+        <div class="couple-hint">
+          <mat-icon>notifications_off</mat-icon>
+          <p>
+            As notificações estão bloqueadas. Habilite nas configurações do navegador/sistema
+            para este app e tente novamente.
+          </p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
   <!-- BUDGET -->
   <mat-card class="settings-card">
     <mat-card-content>

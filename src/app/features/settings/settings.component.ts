@@ -19,8 +19,12 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+
 import { PaymentMethod } from '../../core/models';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { PwaService } from '../../core/services/pwa.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -61,9 +65,18 @@ export class SettingsComponent {
   private readonly toast = inject(ToastService);
   readonly themeService = inject(ThemeService);
   readonly auth = inject(AuthService);
+  readonly notifications = inject(NotificationService);
+  readonly pwa = inject(PwaService);
 
   readonly budgetPresets = BUDGET_PRESETS;
   readonly savingBudget = signal(false);
+
+  // ---------- Notificações ----------
+  readonly savingNotif = signal(false);
+  readonly notifSupported = signal(false);
+  private readonly isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  /** On iOS, web push only works once the PWA is installed to the home screen. */
+  readonly notifNeedsInstall = computed(() => this.isIos && !this.pwa.isStandalone());
 
   readonly currentBudget = computed(
     () => this.settingsService.settings()?.monthlyBudget ?? 0,
@@ -86,6 +99,29 @@ export class SettingsComponent {
         this.budgetForm.patchValue({ value: budget }, { emitEvent: false });
       }
     });
+
+    this.notifications.isSupported().then((s) => this.notifSupported.set(s));
+  }
+
+  async onToggleNotifications(change: MatSlideToggleChange): Promise<void> {
+    this.savingNotif.set(true);
+    try {
+      if (change.checked) {
+        const ok = await this.notifications.enable();
+        if (ok) {
+          this.toast.success('Notificações ativadas 🔔');
+        } else if (this.notifications.permission() === 'denied') {
+          this.toast.error('Permissão negada. Habilite nas configurações do navegador.');
+        } else {
+          this.toast.error('Não foi possível ativar as notificações.');
+        }
+      } else {
+        await this.notifications.disable();
+        this.toast.info('Notificações desativadas');
+      }
+    } finally {
+      this.savingNotif.set(false);
+    }
   }
 
   applyPreset(value: number): void {
