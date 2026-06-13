@@ -79,6 +79,8 @@ export const notifyNewExpense = onDocumentCreated(
         expenseId,
       },
       webpush: {
+        // High urgency so iOS delivers promptly even in standby / Low Power Mode.
+        headers: { Urgency: 'high', TTL: '86400' },
         fcmOptions: { link: '/expenses' },
       },
     });

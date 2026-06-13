@@ -4,7 +4,6 @@ import {
   deleteToken,
   getToken,
   isSupported as isMessagingSupported,
-  onMessage,
 } from '@angular/fire/messaging';
 
 import { environment } from '../../../environments/environment';
@@ -23,8 +22,10 @@ const FCM_SW_SCOPE = '/firebase-cloud-messaging-push-scope';
 /**
  * Owns Web Push (FCM) on the client:
  * - feature detection (older iOS / unsupported browsers degrade gracefully),
- * - permission + token lifecycle (enable / disable / refresh),
- * - foreground message handling (shows a system notification, per product decision).
+ * - permission + token lifecycle (enable / disable / refresh).
+ *
+ * The service worker (`firebase-messaging-sw.js`) renders every push itself
+ * (foreground included), so no in-page message handling is needed here.
  *
  * Messaging is injected lazily so unsupported browsers never construct it.
  */
@@ -42,7 +43,6 @@ export class NotificationService {
 
   private supportedPromise?: Promise<boolean>;
   private currentToken: string | null = null;
-  private foregroundBound = false;
 
   /** True when this browser/device can do web push (iOS needs 16.4+ standalone PWA). */
   async isSupported(): Promise<boolean> {
@@ -90,7 +90,6 @@ export class NotificationService {
         this.buildTokenDoc(token, user.uid, user.displayName),
       );
       this.enabled.set(true);
-      this.listenForeground();
       return true;
     } catch (err) {
       console.error('[push] Falha ao ativar notificações', err);
@@ -135,39 +134,9 @@ export class NotificationService {
         this.buildTokenDoc(token, user.uid, user.displayName),
       );
       this.enabled.set(true);
-      this.listenForeground();
     } catch (err) {
       console.error('[push] Falha ao atualizar token', err);
     }
-  }
-
-  /**
-   * Shows a system notification while the app is in the foreground (product
-   * decision). FCM doesn't auto-display foreground messages, so we render it
-   * via the FCM service worker registration (which owns the click handler).
-   */
-  listenForeground(): void {
-    if (this.foregroundBound) return;
-    this.foregroundBound = true;
-
-    onMessage(this.messaging, async (payload) => {
-      const data = payload.data ?? {};
-      const title = data['title'] ?? 'Novo gasto 🍔';
-      try {
-        const reg =
-          (await navigator.serviceWorker.getRegistration(FCM_SW_SCOPE)) ??
-          (await navigator.serviceWorker.ready);
-        await reg.showNotification(title, {
-          body: data['body'] ?? '',
-          icon: '/icons/icon-192x192.png',
-          badge: '/icons/icon-96x96.png',
-          tag: data['expenseId'] || undefined,
-          data: { url: data['url'] ?? '/expenses' },
-        });
-      } catch (err) {
-        console.error('[push] Falha ao exibir notificação em foreground', err);
-      }
-    });
   }
 
   // ---------- helpers ----------
