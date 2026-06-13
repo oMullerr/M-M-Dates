@@ -177,26 +177,6 @@ import { ToastService } from '../../core/services/toast.service';
           </div>
         }
 
-        @if (previewMessage()) {
-          <section class="preview">
-            <header class="preview-header">
-              <span class="preview-title">
-                <mat-icon>visibility</mat-icon>
-                Pré-visualização
-              </span>
-              <button
-                mat-icon-button
-                type="button"
-                (click)="copyPreview()"
-                matTooltip="Copiar mensagem"
-                aria-label="Copiar"
-              >
-                <mat-icon>content_copy</mat-icon>
-              </button>
-            </header>
-            <pre class="preview-text">{{ previewMessage() }}</pre>
-          </section>
-        }
       </form>
 
       <footer class="form-footer">
@@ -477,50 +457,6 @@ import { ToastService } from '../../core/services/toast.service';
       flex: 1;
     }
 
-    /* PREVIEW -------------------------------------------------- */
-
-    .preview {
-      margin-top: 8px;
-      padding: 14px 16px;
-      background: var(--mat-sys-surface);
-      border: 1px dashed var(--mat-sys-outline-variant);
-      border-radius: 14px;
-    }
-
-    .preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .preview-title {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--mat-sys-on-surface-variant);
-    }
-
-    .preview-title .mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .preview-text {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.85rem;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: var(--mat-sys-on-surface);
-      margin: 0;
-    }
-
     /* FOOTER --------------------------------------------------- */
 
     .form-footer {
@@ -617,28 +553,6 @@ export class ExpenseFormComponent {
   private readonly formValue = signal(this.form.value);
   private editLoaded = false;
   private currentExpense?: Expense;
-
-  readonly previewMessage = computed(() => {
-    const v = this.formValue();
-    const settings = this.settingsService.settings();
-    if (!settings) return '';
-    if (!v.date || !v.location || !v.value || !v.paymentMethod) return '';
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(v.date)) return '';
-
-    try {
-      return this.expenseService.buildMessage(
-        {
-          date: v.date,
-          location: v.location,
-          value: this.parseCurrency(v.value),
-          paymentMethod: v.paymentMethod,
-        },
-        settings,
-      );
-    } catch {
-      return '';
-    }
-  });
 
   constructor() {
     this.form.patchValue({ date: this.todayBR() });
@@ -748,15 +662,6 @@ export class ExpenseFormComponent {
       formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
     }
     this.form.patchValue({ date: formatted });
-  }
-
-  copyPreview(): void {
-    const text = this.previewMessage();
-    if (!text) return;
-    navigator.clipboard
-      .writeText(text)
-      .then(() => this.toast.success('Mensagem copiada ✨'))
-      .catch(() => this.toast.error('Não consegui copiar 😢'));
   }
 
   save(): void {
