@@ -20,6 +20,11 @@
 
 const DEFAULT_URL = '/expenses';
 
+// Take over as soon as the updated worker is installed, so the fixed worker
+// replaces any previously-installed one without needing the PWA fully killed.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
 self.addEventListener('push', (event) => {
   let payload = {};
   try {
@@ -27,17 +32,22 @@ self.addEventListener('push', (event) => {
   } catch (err) {
     // Non-JSON payload — fall back to defaults below.
   }
+  // The Cloud Function sends both `webpush.notification` and `data`; read the
+  // notification first and fall back to data (also handles older payloads).
+  const n = payload.notification || {};
   const data = payload.data || {};
-  const title = data.title || 'Novo gasto 🍔';
+  const title = n.title || data.title || 'Novo gasto 🍔';
+  const body = n.body || data.body || '';
+  const url = data.url || (payload.fcmOptions && payload.fcmOptions.link) || DEFAULT_URL;
 
   event.waitUntil(
     self.registration.showNotification(title, {
-      body: data.body || '',
+      body,
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
       // Collapse repeated sends for the same expense.
       tag: data.expenseId || undefined,
-      data: { url: data.url || DEFAULT_URL },
+      data: { url },
     }),
   );
 });

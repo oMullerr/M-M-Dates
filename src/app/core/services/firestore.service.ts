@@ -106,13 +106,17 @@ export class FirestoreService {
 
   // ---------- Push tokens ----------
 
-  /** Upsert a device token. Doc id is the token itself, so it's idempotent. */
+  /**
+   * Upsert a device token. Doc id is the user's uid (one device per person in
+   * this app), so re-enabling or a rotated token overwrites the same doc
+   * instead of accumulating stale tokens.
+   */
   async savePushToken(coupleId: string, token: PushToken): Promise<void> {
-    await setDoc(doc(this.pushTokensRef(coupleId), token.token), token);
+    await setDoc(doc(this.pushTokensRef(coupleId), token.uid), token);
   }
 
-  /** Remove a device token (e.g. when the user turns notifications off). */
-  async deletePushToken(coupleId: string, token: string): Promise<void> {
-    await deleteDoc(doc(this.pushTokensRef(coupleId), token));
+  /** Remove a user's device token (e.g. when they turn notifications off). */
+  async deletePushToken(coupleId: string, uid: string): Promise<void> {
+    await deleteDoc(doc(this.pushTokensRef(coupleId), uid));
   }
 }

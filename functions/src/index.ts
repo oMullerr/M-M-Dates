@@ -26,6 +26,7 @@ interface ExpenseDoc {
 interface PushTokenDoc {
   token: string;
   uid: string;
+  platform?: string;
 }
 
 const formatBRL = (value: number): string =>
@@ -72,6 +73,9 @@ export const notifyNewExpense = onDocumentCreated(
 
     const response = await getMessaging().sendEachForMulticast({
       tokens: targets.map((t) => t.token),
+      // `data` drives click routing in the service worker; `webpush.notification`
+      // makes the push a VISIBLE alert so iOS/Safari actually delivers it
+      // (data-only pushes are throttled/dropped by Apple as "silent").
       data: {
         title,
         body,
@@ -81,23 +85,34 @@ export const notifyNewExpense = onDocumentCreated(
       webpush: {
         // High urgency so iOS delivers promptly even in standby / Low Power Mode.
         headers: { Urgency: 'high', TTL: '86400' },
+        notification: {
+          title,
+          body,
+          icon: '/icons/icon-192x192.png',
+          badge: '/icons/icon-96x96.png',
+          tag: expenseId,
+        },
         fcmOptions: { link: '/expenses' },
       },
     });
 
-    // Remove tokens that are no longer valid so we don't keep retrying them.
+    // Per-token outcome logging (so a single real test is conclusive) and
+    // cleanup of tokens that are no longer valid so we don't keep retrying them.
     const cleanup: Promise<unknown>[] = [];
     response.responses.forEach((res, i) => {
-      if (res.success) return;
+      const t = targets[i];
+      if (res.success) {
+        logger.info('Push OK', { uid: t.uid, platform: t.platform, messageId: res.messageId });
+        return;
+      }
       const code = res.error?.code;
+      logger.warn('Push falhou', { uid: t.uid, platform: t.platform, code });
       if (
         code === 'messaging/registration-token-not-registered' ||
         code === 'messaging/invalid-registration-token' ||
         code === 'messaging/invalid-argument'
       ) {
-        cleanup.push(targets[i].ref.delete());
-      } else {
-        logger.warn('Falha ao enviar push', { code, token: targets[i].token });
+        cleanup.push(t.ref.delete());
       }
     });
     await Promise.all(cleanup);

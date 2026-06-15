@@ -99,13 +99,12 @@ export class NotificationService {
 
   /** Turns notifications off: deletes the FCM token and removes its Firestore doc. */
   async disable(): Promise<void> {
-    const coupleId = this.auth.currentUser()?.coupleId;
+    const user = this.auth.currentUser();
     try {
       if (!(await this.isSupported())) return;
-      const token = this.currentToken ?? (await this.fetchToken().catch(() => null));
       await deleteToken(this.messaging).catch(() => {});
-      if (token && coupleId) {
-        await this.firestore.deletePushToken(coupleId, token).catch(() => {});
+      if (user?.uid && user?.coupleId) {
+        await this.firestore.deletePushToken(user.coupleId, user.uid).catch(() => {});
       }
       this.currentToken = null;
       this.enabled.set(false);
