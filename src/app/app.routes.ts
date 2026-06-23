@@ -82,6 +82,13 @@ export const routes: Routes = [
       import('./features/settings/settings.component').then((m) => m.SettingsComponent),
     title: 'Configurações · M&M Dates',
   },
+  {
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/profile.component').then((m) => m.ProfileComponent),
+    title: 'Você · M&M Dates',
+  },
   // Wildcard fallback — same logic as root: route based on auth state.
   {
     path: '**',

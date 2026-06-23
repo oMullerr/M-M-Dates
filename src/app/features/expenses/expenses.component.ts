@@ -27,6 +27,7 @@ import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ToastService } from '../../core/services/toast.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { MonthFilterComponent } from '../../shared/components/month-filter.component';
 import {
   ExpenseDetailSheetComponent,
   ExpenseDetailData,
@@ -58,6 +59,7 @@ type SortOption = 'date-desc' | 'date-asc' | 'value-desc' | 'value-asc';
     MatDividerModule,
     MatTooltipModule,
     BrlPipe,
+    MonthFilterComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './expenses.component.html',

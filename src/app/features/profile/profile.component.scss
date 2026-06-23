@@ -1,0 +1,152 @@
+:host { display: block; }
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 900px;
+}
+
+.page-header { margin-bottom: 4px; }
+
+.page-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  color: var(--mat-sys-on-surface);
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+/* ===========================================================
+   CARDS
+   =========================================================== */
+
+.settings-card { border-radius: 20px !important; }
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.card-row-text { flex: 1; min-width: 0; }
+
+.card-row-text h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+  color: var(--mat-sys-on-surface);
+}
+
+.card-row-text p {
+  font-size: 0.82rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.card-row-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-row-icon .mat-icon { font-size: 22px; width: 22px; height: 22px; }
+
+.icon-primary {
+  background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.icon-secondary {
+  background: color-mix(in srgb, var(--mat-sys-secondary) 16%, transparent);
+  color: var(--mat-sys-secondary);
+}
+
+.icon-danger {
+  background: color-mix(in srgb, var(--mat-sys-error) 12%, transparent);
+  color: var(--mat-sys-error);
+}
+
+/* ===========================================================
+   HERO / PERFIL
+   =========================================================== */
+
+.profile-hero {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--mat-sys-primary) 8%, var(--mat-sys-surface)) 0%,
+    color-mix(in srgb, var(--mat-sys-tertiary) 8%, var(--mat-sys-surface)) 100%) !important;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--mat-sys-primary) 0%, var(--mat-sys-tertiary) 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--mat-sys-primary) 35%, transparent);
+}
+
+.hero-info { min-width: 0; }
+
+.hero-info strong {
+  display: block;
+  font-size: 1.2rem;
+  color: var(--mat-sys-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-info small {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===========================================================
+   AÇÕES
+   =========================================================== */
+
+.row-action {
+  border-radius: 999px !important;
+  white-space: nowrap;
+}
+
+.row-action .mat-icon { margin-right: 4px; }
+
+.signout { color: var(--mat-sys-error); }
+.signout .mat-icon { color: var(--mat-sys-error); }
+
+/* ===========================================================
+   RESPONSIVE
+   =========================================================== */
+
+@media (max-width: 700px) {
+  .page-title { font-size: 1.45rem; }
+  .card-row { flex-wrap: wrap; }
+  .row-action { width: 100%; }
+}

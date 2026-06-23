@@ -57,6 +57,7 @@ import { MonthFilterService } from '../../core/services/month-filter.service';
       align-items: center;
       gap: 4px;
       background: var(--mat-sys-surface-container);
+      border: 1px solid var(--mat-sys-outline-variant);
       border-radius: 999px;
       padding: 4px;
     }

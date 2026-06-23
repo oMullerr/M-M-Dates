@@ -91,6 +91,12 @@ body {
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
+  /* Fundo levemente gradiente (violet -> rose) para o vidro ter o que refratar */
+  background:
+    radial-gradient(120% 85% at 10% -10%, color-mix(in srgb, var(--mat-sys-primary) 14%, transparent), transparent 58%),
+    radial-gradient(110% 80% at 110% 115%, color-mix(in srgb, var(--mat-sys-tertiary) 14%, transparent), transparent 55%),
+    var(--mat-sys-surface);
+  background-attachment: fixed;
 }
 
 h1,
@@ -212,6 +218,121 @@ body,
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* ===========================================================
+   LIQUID GLASS
+   =========================================================== */
+
+:root {
+  --glass-blur: 22px;
+  --glass-saturate: 180%;
+  --glass-bg: color-mix(in srgb, var(--mat-sys-surface) 52%, transparent);
+  --glass-border: color-mix(in srgb, white 45%, transparent);
+  --glass-highlight: color-mix(in srgb, white 65%, transparent);
+  --glass-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.04);
+}
+
+html.dark-theme {
+  --glass-bg: color-mix(in srgb, var(--mat-sys-surface) 38%, transparent);
+  --glass-border: color-mix(in srgb, white 16%, transparent);
+  --glass-highlight: color-mix(in srgb, white 22%, transparent);
+  --glass-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 var(--glass-highlight),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.25);
+}
+
+@mixin glass-core {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass {
+  @include glass-core;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reflexo especular no topo */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, white 28%, transparent) 0%,
+    transparent 40%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glass nos overlays do Material (chrome) */
+.mat-bottom-sheet-container {
+  @include glass-core;
+  border-radius: 28px 28px 0 0 !important;
+}
+
+.mat-mdc-dialog-surface {
+  @include glass-core;
+}
+
+.mat-mdc-menu-panel {
+  @include glass-core;
+  border-radius: 18px !important;
+}
+
+.mat-mdc-menu-panel .mat-mdc-menu-content {
+  background: transparent;
+}
+
+/* Fallback quando backdrop-filter não é suportado */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .mat-bottom-sheet-container,
+  .mat-mdc-dialog-surface,
+  .mat-mdc-menu-panel {
+    background: var(--mat-sys-surface-container);
+  }
+}
+
+/* ===========================================================
+   LIQUID GLASS DESATIVADO → superfícies sólidas (estilo anterior)
+   =========================================================== */
+
+html.no-glass {
+  --glass-blur: 0px;
+  --glass-saturate: 100%;
+  --glass-bg: var(--mat-sys-surface-container);
+  --glass-border: var(--mat-sys-outline-variant);
+  --glass-highlight: transparent;
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+html.no-glass.dark-theme {
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Sem reflexo especular nem fundo gradiente */
+html.no-glass .glass::before { display: none; }
+
+html.no-glass body {
+  background: var(--mat-sys-surface);
+}
+
+/* FAB volta a ser primary sólido */
+html.no-glass .fab-mobile {
+  background: var(--mat-sys-primary) !important;
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28) !important;
+}
+
 /* Animations */
 @keyframes fade-up {
   from {
@@ -227,6 +348,17 @@ body,
 
 .fade-up {
   animation: fade-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes tabbar-in {
+  from { opacity: 0; transform: translate(-50%, 26px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Liquid glass respeita movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  .tabbar { animation: none !important; }
+  .tab-pill { transition: none !important; }
 }
 
 /* Mobile touch targets */

@@ -20,6 +20,7 @@ import { SettingsService } from '../../core/services/settings.service';
 import { MonthFilterService } from '../../core/services/month-filter.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { BrlPipe } from '../../shared/pipes/brl.pipe';
+import { MonthFilterComponent } from '../../shared/components/month-filter.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,6 +35,7 @@ import { BrlPipe } from '../../shared/pipes/brl.pipe';
     MatDividerModule,
     BaseChartDirective,
     BrlPipe,
+    MonthFilterComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.component.html',

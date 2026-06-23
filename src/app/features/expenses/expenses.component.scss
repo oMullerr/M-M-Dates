@@ -277,9 +277,18 @@
 .fab-mobile {
   display: none;
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 50;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  right: 20px;
+  z-index: 49;
+  --mdc-fab-container-color: transparent;
+  background: color-mix(in srgb, var(--mat-sys-primary) 72%, transparent) !important;
+  color: #fff !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid color-mix(in srgb, white 35%, transparent);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent),
+    inset 0 1px 0 var(--glass-highlight) !important;
 }
 
 /* ===========================================================
