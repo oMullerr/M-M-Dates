@@ -130,15 +130,29 @@
 
 .list-content { padding: 8px 12px !important; }
 
+.day-group + .day-group { margin-top: 8px; }
+
+.day-header {
+  padding: 12px 12px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
 .row-item {
   display: grid;
-  grid-template-columns: 4px 100px 1fr auto 130px 96px;
+  grid-template-columns: 4px 1fr auto 130px 96px;
   align-items: center;
   gap: 14px;
   padding: 12px 12px;
   border-radius: 12px;
+  cursor: pointer;
   transition: background 0.15s;
 }
+
+.row-date { display: none; }
 
 .row-item:hover { background: var(--mat-sys-surface-container); }
 

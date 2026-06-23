@@ -4,6 +4,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
@@ -23,6 +24,10 @@ export const appConfig: ApplicationConfig = {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
     },
+
+    // Date picker (pt-BR → exibe dd/MM/yyyy)
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
 
     // Firebase
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),

@@ -25,6 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 import { Expense } from '../../core/models';
 import { ExpenseService } from '../../core/services/expense.service';
@@ -43,6 +44,7 @@ import { ToastService } from '../../core/services/toast.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatDatepickerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -75,16 +77,15 @@ import { ToastService } from '../../core/services/toast.service';
           <mat-form-field appearance="outline">
             <mat-label>Data</mat-label>
             <input
+              #dateTrigger
               matInput
-              formControlName="date"
-              placeholder="dd/MM/aaaa"
-              maxlength="10"
-              inputmode="numeric"
-              (input)="formatDate($event)"
+              readonly
+              [value]="(form.controls.date.value | date: 'dd/MM/yyyy') || ''"
+              (click)="toggleCalendar()"
             />
             <mat-icon matSuffix>event</mat-icon>
             @if (form.get('date')?.touched && form.get('date')?.invalid) {
-              <mat-error>Use o formato dd/MM/aaaa</mat-error>
+              <mat-error>Selecione uma data</mat-error>
             }
           </mat-form-field>
 
@@ -174,6 +175,21 @@ import { ToastService } from '../../core/services/toast.service';
                 <small class="pm-owner">· {{ pm.owner }}</small>
               </button>
             }
+          </div>
+        }
+
+        @if (calendarOpen()) {
+          <div class="calendar-backdrop" (click)="calendarOpen.set(false)"></div>
+          <div
+            class="calendar-panel"
+            [style.top.px]="calTop()"
+            [style.left.px]="calLeft()"
+          >
+            <mat-calendar
+              [selected]="form.controls.date.value"
+              [startAt]="form.controls.date.value"
+              (selectedChange)="onDateSelected($event)"
+            />
           </div>
         }
 
@@ -457,6 +473,32 @@ import { ToastService } from '../../core/services/toast.service';
       flex: 1;
     }
 
+    /* CALENDAR (custom panel, mesmo padrão do dropdown de pagamento) ---- */
+
+    .calendar-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: transparent;
+    }
+
+    .calendar-panel {
+      position: fixed;
+      z-index: 1001;
+      width: 320px;
+      max-width: calc(100vw - 16px);
+      background: var(--mat-sys-surface-container);
+      border-radius: 16px;
+      border: 1px solid var(--mat-sys-outline-variant);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+      padding: 4px 8px;
+      animation: payment-panel-in 160ms ease-out both;
+    }
+
+    .calendar-panel mat-calendar {
+      width: 100%;
+    }
+
     /* FOOTER --------------------------------------------------- */
 
     .form-footer {
@@ -543,8 +585,13 @@ export class ExpenseFormComponent {
   readonly dropdownLeft = signal(0);
   readonly dropdownWidth = signal(0);
 
+  readonly dateTrigger = viewChild<ElementRef<HTMLInputElement>>('dateTrigger');
+  readonly calendarOpen = signal(false);
+  readonly calTop = signal(0);
+  readonly calLeft = signal(0);
+
   readonly form = this.fb.nonNullable.group({
-    date: ['', [Validators.required, Validators.pattern(/^\d{2}\/\d{2}\/\d{4}$/)]],
+    date: this.fb.nonNullable.control<Date>(new Date(), Validators.required),
     location: ['', [Validators.required, Validators.minLength(2)]],
     value: ['', [Validators.required, this.minValueValidator(0.01)]],
     paymentMethod: ['', Validators.required],
@@ -555,7 +602,6 @@ export class ExpenseFormComponent {
   private currentExpense?: Expense;
 
   constructor() {
-    this.form.patchValue({ date: this.todayBR() });
     this.form.valueChanges.subscribe((v) => this.formValue.set(v));
 
     effect(() => {
@@ -573,7 +619,7 @@ export class ExpenseFormComponent {
 
       this.currentExpense = expense;
       this.form.patchValue({
-        date: expense.date,
+        date: this.parseBRDate(expense.date),
         location: expense.location,
         value: this.formatNumberAsCurrency(expense.value),
         paymentMethod: expense.paymentMethod,
@@ -621,18 +667,52 @@ export class ExpenseFormComponent {
     this.paymentMenuOpen.set(false);
   }
 
+  toggleCalendar(): void {
+    if (this.calendarOpen()) {
+      this.calendarOpen.set(false);
+      return;
+    }
+    this.openCalendar();
+  }
+
+  private openCalendar(): void {
+    const trigger = this.dateTrigger();
+    if (!trigger) return;
+    const rect = trigger.nativeElement.getBoundingClientRect();
+    const panelWidth = 320;
+    const panelHeight = 360;
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    const top =
+      spaceBelow >= panelHeight + 12 || spaceBelow >= rect.top
+        ? rect.bottom + 6
+        : Math.max(8, rect.top - panelHeight - 6);
+    const left = Math.min(
+      Math.max(8, rect.left),
+      window.innerWidth - panelWidth - 8,
+    );
+
+    this.calTop.set(top);
+    this.calLeft.set(left);
+    this.calendarOpen.set(true);
+  }
+
+  onDateSelected(date: Date | null): void {
+    if (date) this.form.patchValue({ date });
+    this.form.get('date')?.markAsTouched();
+    this.calendarOpen.set(false);
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.paymentMenuOpen()) {
-      this.paymentMenuOpen.set(false);
-    }
+    this.paymentMenuOpen.set(false);
+    this.calendarOpen.set(false);
   }
 
   @HostListener('window:resize')
   onViewportResize(): void {
-    if (this.paymentMenuOpen()) {
-      this.paymentMenuOpen.set(false);
-    }
+    this.paymentMenuOpen.set(false);
+    this.calendarOpen.set(false);
   }
 
   colorForSelectedMethod(): string {
@@ -652,18 +732,6 @@ export class ExpenseFormComponent {
     this.form.patchValue({ value: this.formatNumberAsCurrency(numeric) });
   }
 
-  formatDate(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 8);
-    let formatted = digits;
-    if (digits.length >= 3 && digits.length <= 4) {
-      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    } else if (digits.length >= 5) {
-      formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-    }
-    this.form.patchValue({ date: formatted });
-  }
-
   save(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -672,7 +740,7 @@ export class ExpenseFormComponent {
 
     const v = this.form.getRawValue();
     const payload: Omit<Expense, 'id'> = {
-      date: v.date,
+      date: this.dateToBR(v.date),
       location: v.location.trim(),
       value: this.parseCurrency(v.value),
       paymentMethod: v.paymentMethod,
@@ -706,11 +774,15 @@ export class ExpenseFormComponent {
     }
   }
 
-  private todayBR(): string {
-    const d = new Date();
+  private dateToBR(d: Date): string {
     const dd = String(d.getDate()).padStart(2, '0');
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     return `${dd}/${mm}/${d.getFullYear()}`;
+  }
+
+  private parseBRDate(date: string): Date {
+    const [d, m, y] = date.split('/').map(Number);
+    return new Date(y, m - 1, d);
   }
 
   private parseCurrency(formatted: string): number {

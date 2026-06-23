@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx ng *)"
+      "Bash(npx ng *)",
+      "PowerShell(npm --prefix functions run build 2>&1)",
+      "PowerShell(npm run build)"
     ]
   }
 }

@@ -114,8 +114,11 @@
   @if (filteredExpenses().length > 0) {
     <mat-card class="list-card">
       <mat-card-content class="list-content">
-        @for (expense of filteredExpenses(); track expense.id) {
-          <div class="row-item">
+        @for (group of groupedExpenses(); track group.key) {
+          <div class="day-group">
+            <div class="day-header">{{ group.label }}</div>
+            @for (expense of group.items; track expense.id) {
+          <div class="row-item" (click)="openDetails(expense)">
             <span class="row-bar" [style.background]="colorForMethod(expense.paymentMethod)"></span>
 
             <div class="row-date">
@@ -142,7 +145,7 @@
             <div class="row-actions">
               <button
                 mat-icon-button
-                (click)="copyMessage(expense)"
+                (click)="$event.stopPropagation(); copyMessage(expense)"
                 matTooltip="Copiar mensagem"
                 aria-label="Copiar mensagem"
               >
@@ -151,6 +154,7 @@
               <button
                 mat-icon-button
                 [matMenuTriggerFor]="menu"
+                (click)="$event.stopPropagation()"
                 aria-label="Mais ações"
               >
                 <mat-icon>more_vert</mat-icon>
@@ -166,6 +170,8 @@
                 </button>
               </mat-menu>
             </div>
+          </div>
+            }
           </div>
         }
       </mat-card-content>
